@@ -41,10 +41,10 @@ class LedLightSimulation:
             print(f"⚠️ Error: Received invalid JSON: {payload}")
 
     def turn_on_lights(self):
-        if self.sector.light_intensity < self.fixed_led_intensity:
-            self.sector.light_intensity = self.fixed_led_intensity  
+        # if self.sector.light_intensity < self.fixed_led_intensity:
+        #     self.sector.light_intensity = self.fixed_led_intensity  
         
-        self.client_mqtt.publish(f"greenhouse/{self.sector.name}/light_intensity", self.fixed_led_intensity)
+        # self.client_mqtt.publish(f"greenhouse/{self.sector.name}/light_intensity", self.fixed_led_intensity)
         # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "ON")
         self.running = True  # Mark as ON
         
