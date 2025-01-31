@@ -24,7 +24,6 @@ class Sector:
         self.actuators = [FanSimulation(self)]
 
     def run_simulation(self, client: Client):
-        print("Runnning simulation")
         rand = random.randint(0, 9)
         # if rand == 0:
 
@@ -32,4 +31,7 @@ class Sector:
         self.temperature += random.randint(-1, 10)
         # Fix extreme values
         client.publish(f"greenhouse/{self.name}/temperature", self.temperature)
+        client.publish(f"greenhouse/{self.name}/co2_levels", self.co2_levels)
+        client.publish(f"greenhouse/{self.name}/humidity", self.humidity)
+        client.publish(f"greenhouse/{self.name}/light_intensity", self.light_intensity)
         
