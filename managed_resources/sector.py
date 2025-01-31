@@ -5,6 +5,7 @@ from actuators_simulation.fan_simulation import FanSimulation
 from actuators_simulation.co2_injector_simulation import CO2InjectorSimulation
 from actuators_simulation.heater_simulation import HeaterSimulation
 from actuators_simulation.pump_simulation import PumpSimulation
+from actuators_simulation.led_lights_simulation import LedLightSimulation
 
 
 
@@ -17,19 +18,23 @@ class Sector:
     light_intensity = 0
     exterior = {}
 
-    def __init__(self, name: str, temperature: float, co2_levels: int, humidity: int, light_intensity: int, exterior: dict):
+    def __init__(self, name: str, temperature: float, co2_levels: int, humidity: int, light_intensity: int, exterior: dict, light_simulation):
         self.name = name
+        self.light_simulation = light_simulation
         self.co2_levels = co2_levels
         self.temperature = temperature
-        self.light_intensity = light_intensity
+        self.light_intensity = self.light_simulation.get_light_intensity()
         self.humidity = humidity
         self.exterior = exterior
         # self.actuators = [FanSimulation(self), CO2InjectorSimulation(self)]
-        self.actuators = [HeaterSimulation(self), CO2InjectorSimulation(self), PumpSimulation(self)]
+        self.actuators = [HeaterSimulation(self), CO2InjectorSimulation(self), PumpSimulation(self), LedLightSimulation(self)]
 
     def run_simulation(self, client: Client):
     
         trend_effect = 0.5  # Adjust sensitivity (higher = faster changes)
+        
+        # Light Adjustment
+        self.light_intensity = self.light_simulation.get_light_intensity()
         
         # Temperature Adjustment
         if self.exterior["temperature"]["trend"] == "up":
@@ -53,5 +58,6 @@ class Sector:
         client.publish(f"greenhouse/{self.name}/temperature", self.temperature)
         client.publish(f"greenhouse/{self.name}/humidity", self.humidity)
         client.publish(f"greenhouse/{self.name}/co2_levels", self.co2_levels)
+        client.publish(f"greenhouse/{self.name}/light_intensity", self.light_intensity)
 
         # print(f"{self.name} - Temp: {self.temperature:.1f}°C, Humidity: {self.humidity:.1f}%, CO2: {self.co2_levels} ppm")

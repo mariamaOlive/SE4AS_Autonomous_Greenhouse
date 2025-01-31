@@ -3,6 +3,7 @@ from typing import List
 import paho.mqtt.client as mqtt
 import json
 from sector import Sector
+from light_simulation import LightSimulation
 
 
 
@@ -20,12 +21,14 @@ if __name__ == '__main__':
     weather_type = "Sunny"
     sectors_conf = sector_data[weather_type]["sectors"]
     exterior_conf = sector_data[weather_type]["exterior"]
+    
+    light_simulation = LightSimulation(sector_data[weather_type]["exterior"]["light_intensity"]["value"])
 
     # Initilize sections array
     sectors = []
     # Load Sections
     for sector in sectors_conf:
-        new_sector = Sector(sector["name"], sector["temperature"], sector["co2_levels"], sector["humidity"], sector["light_intensity"], exterior_conf)
+        new_sector = Sector(sector["name"], sector["temperature"], sector["co2_levels"], sector["humidity"], sector["light_intensity"], exterior_conf, light_simulation)
         sectors.append(new_sector)
         
     # Run Simulation
