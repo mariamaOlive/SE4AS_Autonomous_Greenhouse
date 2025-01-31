@@ -13,7 +13,7 @@ def on_message(client, userdata, msg):
     key = msg.topic.split("/")
     db_knowledge.writeDB(key, payload)
 
-    print(f"{msg.topic}  -> {payload}")
+    # print(f"{msg.topic}  -> {payload}")
 
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):

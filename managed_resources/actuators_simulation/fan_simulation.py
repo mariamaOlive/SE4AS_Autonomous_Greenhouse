@@ -2,10 +2,12 @@ import paho.mqtt.client as mqtt
 from threading import Thread
 import time 
 import json
+import random
 
 class FanSimulation:
     def __init__(self, sector):
         self.sector = sector
+        self.running = False # The fan is OFF
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
         self.client_mqtt.on_message = self.on_message
@@ -32,7 +34,7 @@ class FanSimulation:
             print(f"Fan in {self.sector.name} received command: {command}")
 
             if command == "ON":
-                self.start_fan(5)  # Default power 5
+                self.start_fan(10)  # Default power 5
             elif command == "OFF":
                 self.stop_fan()
 
@@ -57,18 +59,18 @@ class FanSimulation:
 
 
     def cooling_effect(self):
-        """Continuously reduces temperature while the fan is running."""
-        k = 0.05  # Cooling efficiency factor
+        k = 0.005  # Cooling efficiency factor
+
         while self.running:
+            temp_drop = -k * self.power * self.sector.temperature  # Cooling based on current temp & fan power
+            self.sector.temperature += temp_drop*random.uniform(0.1, 1)  # Apply cooling
             
-            ## Use formula to simulate temperature drop
-            if self.sector.temperature > self.sector.exterior["temperature"]:
-                temp_drop = -k * self.power * (self.sector.temperature - self.sector.exterior["temperature"])
-                self.sector.temperature += temp_drop 
+            hum_drop = -k * self.power * self.sector.humidity  # Cooling based on current temp & fan power
+            self.sector.humidity += hum_drop*random.uniform(0.1, 1)  # Apply cooling
 
-                # Publish new temperature to MQTT
-                self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
+            # Publish new temperature to MQTT
+            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
+            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/humidity", self.sector.humidity)
+            # print(f"Fan cooling: {self.sector.name} -> Temp: {self.sector.temperature:.2f}°C")
 
-                print(f"Fan cooling: {self.sector.name} -> Temp: {self.sector.temperature:.2f}°C")
-
-            time.sleep(5)  # Update temperature every 5 seconds
+            time.sleep(5)  # Update every 5 seconds

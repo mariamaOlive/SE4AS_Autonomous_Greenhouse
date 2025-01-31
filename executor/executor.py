@@ -40,4 +40,4 @@ if __name__ == '__main__':
     while True:
         for sector in sectors_conf:
             execute(client_mqtt, sector["name"])
-        time.sleep(10)
+        time.sleep(60)
