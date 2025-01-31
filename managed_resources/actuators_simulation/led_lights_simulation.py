@@ -7,7 +7,7 @@ class LedLightSimulation:
     def __init__(self, sector):
         self.sector = sector
         self.running = False
-        self.fixed_led_intensity = 5000  # Fixed LED intensity when ON (in lux)
+        self.fixed_led_intensity = 60000  # Fixed LED intensity when ON (in lux)
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
         self.client_mqtt.on_message = self.on_message
@@ -47,7 +47,6 @@ class LedLightSimulation:
         self.client_mqtt.publish(f"greenhouse/{self.sector.name}/light_intensity", self.fixed_led_intensity)
         # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "ON")
         self.running = True  # Mark as ON
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>light")
         
     def turn_off_lights(self):
         # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "OFF")

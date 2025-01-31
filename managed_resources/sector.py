@@ -27,7 +27,11 @@ class Sector:
         self.humidity = humidity
         self.exterior = exterior
         # self.actuators = [FanSimulation(self), CO2InjectorSimulation(self)]
-        self.actuators = [HeaterSimulation(self), CO2InjectorSimulation(self), PumpSimulation(self), LedLightSimulation(self)]
+        self.actuators = [FanSimulation(self),
+                          HeaterSimulation(self),
+                          CO2InjectorSimulation(self), 
+                          PumpSimulation(self),
+                          LedLightSimulation(self)]
 
     def run_simulation(self, client: Client):
     
