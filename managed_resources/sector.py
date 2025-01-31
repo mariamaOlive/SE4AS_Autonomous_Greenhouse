@@ -51,12 +51,15 @@ class Sector:
             self.humidity += trend_effect*random.uniform(0.1, 1.5)   # Increase humidity
         else:
             self.humidity -= trend_effect*random.uniform(0.1, 1.5)   # Decrease humidity
+        
+        self.humidity = max(0, min(self.humidity, 100))
 
         # CO2 Adjustment
+       
         if self.exterior["co2_levels"]["trend"] == "up":
-            self.co2_levels += trend_effect*random.uniform(0.1, 1.5)  # Increase CO2
+            self.co2_levels += random.uniform(5, 15)  # Increase CO2
         else:
-            self.co2_levels -= trend_effect*random.uniform(0.1, 1.5)  # Decrease CO2
+            self.co2_levels -= random.uniform(5, 15)  # Decrease CO2
 
         # Publish updated values to MQTT
         client.publish(f"greenhouse/{self.name}/temperature", self.temperature)

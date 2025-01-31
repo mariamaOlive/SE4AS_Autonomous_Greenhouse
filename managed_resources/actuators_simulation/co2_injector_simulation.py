@@ -55,11 +55,11 @@ class CO2InjectorSimulation:
         # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", "OFF")
 
     def co2_injection_effect(self):
-        k = 0.01  # Efficiency factor
+        k = 0.03  # Efficiency factor
 
         while self.running:
             co2_increase = k * self.sector.co2_levels  
-            self.sector.co2_levels += co2_increase*random.uniform(0.1, 1)  # Apply cooling
+            self.sector.co2_levels += co2_increase*random.uniform(.5, 1) 
             
             # Publish new value to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/co2_levels", self.sector.co2_levels)
