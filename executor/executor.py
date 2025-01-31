@@ -1,0 +1,43 @@
+import paho.mqtt.client as mqtt
+import time
+import json
+import random
+
+
+def execute(client, sector):
+    execution_plan = {}
+    
+    # fan - : on/off
+    # heater - : on/off
+    # Hatches  - : open/close
+    # pumps  - : on/off
+    # led_lights  - : on/off
+    # co2_injectors: on/of
+    message_key = f"execute/{sector}" 
+
+    command_fan = random.choice(["ON", "OFF"])
+    execution_plan["fan"] = command_fan
+    
+    print(f"Publishing to {message_key}: {execution_plan}")
+    client.publish(message_key, json.dumps(execution_plan))
+
+
+if __name__ == '__main__':
+
+    # Message broker connection
+    client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
+    client_mqtt.connect("mosquitto", 1883)
+    
+    
+    #REMOVE: Here for testing pur
+    with open("sector_config.json", "r") as file:
+        sector_data = json.load(file)
+    weather_type = "Sunny"
+    sectors_conf = sector_data[weather_type]["sectors"]
+    exterior_conf = sector_data[weather_type]["exterior"]
+
+
+    while True:
+        for sector in sectors_conf:
+            execute(client_mqtt, sector["name"])
+        time.sleep(10)

@@ -34,6 +34,7 @@ services:
     depends_on:
       - influxdb
       - mqtt_broker
+      - managed_resources
     environment:
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_BUCKET=greenhouse
@@ -44,6 +45,20 @@ services:
     volumes:
       - ./monitor:/app
     command: python -u /app/monitor.py 
+
+  executor:
+    build: ./executor
+    container_name: executor
+    depends_on:
+      - influxdb
+      - mqtt_broker
+      - managed_resources
+    environment:
+      - MQTT_BROKER_HOST=mqtt_broker
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./executor:/app
+    command: python -u /app/executor.py 
 
   managed_resources:
     build: ./managed_resources

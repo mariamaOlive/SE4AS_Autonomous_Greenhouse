@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 from threading import Thread
 import time 
+import json
 
 class FanSimulation:
     def __init__(self, sector):
@@ -15,19 +16,29 @@ class FanSimulation:
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"Fan in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}/fan")
+            client.subscribe(f"execute/{self.sector.name}")
         else:
             print(f"Failed to connect fan in {self.sector.name}, error {rc}")
 
+
     def on_message(self, client, userdata, msg):
-        command = msg.payload.decode("utf-8")
-        print(f"Fan in {self.sector.name} received: {command}")
-        if command.startswith("ON"):
-            #TODO: Define if there is more than one speed
-            # _, power = command.split("_") if "_" in command else ("ON", "5")  # Default to power 5 
-            self.start_fan(5)
-        elif command == "OFF":
-            self.stop_fan()
+        payload = msg.payload.decode("utf-8")
+        
+        try:
+            # Parse JSON message
+            data = json.loads(payload)
+            command = data.get("fan")  # Extract "fan" key from JSON
+
+            print(f"Fan in {self.sector.name} received command: {command}")
+
+            if command == "ON":
+                self.start_fan(5)  # Default power 5
+            elif command == "OFF":
+                self.stop_fan()
+
+        except json.JSONDecodeError:
+            print(f"⚠️ Error: Received invalid JSON: {payload}")
+
 
     def start_fan(self, power):
         if not self.running:
@@ -38,10 +49,12 @@ class FanSimulation:
 
         self.client_mqtt.publish(f"feedback/{self.sector.name}/fan", f"ON_{self.power}")
 
+
     def stop_fan(self):
         self.running = False
         print(f"Fan stopped in {self.sector.name}")
         self.client_mqtt.publish(f"feedback/{self.sector.name}/fan", "OFF")
+
 
     def cooling_effect(self):
         """Continuously reduces temperature while the fan is running."""
