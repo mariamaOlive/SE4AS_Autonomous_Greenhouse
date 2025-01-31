@@ -4,6 +4,7 @@ import random
 from actuators_simulation.fan_simulation import FanSimulation
 from actuators_simulation.co2_injector_simulation import CO2InjectorSimulation
 from actuators_simulation.heater_simulation import HeaterSimulation
+from actuators_simulation.pump_simulation import PumpSimulation
 
 
 
@@ -24,7 +25,7 @@ class Sector:
         self.humidity = humidity
         self.exterior = exterior
         # self.actuators = [FanSimulation(self), CO2InjectorSimulation(self)]
-        self.actuators = [HeaterSimulation(self), CO2InjectorSimulation(self)]
+        self.actuators = [HeaterSimulation(self), CO2InjectorSimulation(self), PumpSimulation(self)]
 
     def run_simulation(self, client: Client):
     
