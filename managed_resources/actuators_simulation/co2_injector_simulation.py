@@ -1,10 +1,13 @@
 import paho.mqtt.client as mqtt
 from threading import Thread
 import time 
+import random
+import json
 
 class CO2InjectorSimulation:
     def __init__(self, sector):
         self.sector = sector
+        self.running = False
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
         self.client_mqtt.on_message = self.on_message
@@ -14,49 +17,50 @@ class CO2InjectorSimulation:
         
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
-            print(f"Fan in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}/co2_injectors")
+            print(f"CO2 Injector in {self.sector.name} connected")
+            client.subscribe(f"execute/{self.sector.name}")
         else:
             print(f"Failed to connect co2_injectors in {self.sector.name}, error {rc}")
 
     def on_message(self, client, userdata, msg):
-        command = msg.payload.decode("utf-8")
-        print(f"Fan in {self.sector.name} received: {command}")
-        if command.startswith("ON"):
-            #TODO: Define if there is more than one speed
-            # _, power = command.split("_") if "_" in command else ("ON", "5")  # Default to power 5 
-            self.start_fan(5)
-        elif command == "OFF":
-            self.stop_fan()
+        payload = msg.payload.decode("utf-8")
+                
+        try:
+            # Parse JSON message
+            data = json.loads(payload)
+            command = data.get("co2_injector")  # Extract "co2_injector" key from JSON
 
-    def start_fan(self, power):
+            print(f"CO2 injector in {self.sector.name} received command: {command}")
+
+            if command == "ON":
+                self.start_co2_injection() # Default power 5
+            elif command == "OFF":
+                self.stop_co2_injection()
+
+        except json.JSONDecodeError:
+            print(f"⚠️ Error: Received invalid JSON: {payload}")
+
+
+    def start_co2_injection(self):
         if not self.running:
             self.running = True
-            self.power = max(1, min(10, power))  # Ensure power is between 1 and 10
-            print(f"co2_injectors started in {self.sector.name} at power {self.power}")
-            Thread(target=self.cooling_effect).start() # Use a thread to simulate the effect
+            print(f"co2_injectors started in {self.sector.name}")
+            Thread(target=self.co2_injection_effect).start() # Use a thread to simulate the effect
 
-        self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injectors", f"ON_{self.power}")
+        # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", f"ON_{self.power}")
 
-    def stop_fan(self):
+    def stop_co2_injection(self):
         self.running = False
         print(f"co2_injectors stopped in {self.sector.name}")
-        self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injectors", "OFF")
+        # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", "OFF")
 
-    def cooling_effect(self):
-        pass
-        # """Continuously reduces temperature while the fan is running."""
-        # k = 0.05  # Cooling efficiency factor
-        # while self.running:
+    def co2_injection_effect(self):
+        k = 0.01  # Efficiency factor
+
+        while self.running:
+            co2_increase = k * self.sector.co2_levels  
+            self.sector.co2_levels += co2_increase*random.uniform(0.1, 1)  # Apply cooling
             
-        #     ## Use formula to simulate temperature drop
-        #     if self.sector.temperature > self.sector.exterior["temperature"]:
-        #         temp_drop = -k * self.power * (self.sector.temperature - self.sector.exterior["temperature"])
-        #         self.sector.temperature += temp_drop 
-
-        #         # Publish new temperature to MQTT
-        #         self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
-
-        #         print(f"Fan cooling: {self.sector.name} -> Temp: {self.sector.temperature:.2f}°C")
-
-        #     time.sleep(5)  # Update temperature every 5 seconds
+            # Publish new value to MQTT
+            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/co2_levels", self.sector.co2_levels)
+            time.sleep(5)  # Update every 5 seconds
