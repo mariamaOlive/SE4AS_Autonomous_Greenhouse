@@ -10,6 +10,8 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=password
       - DOCKER_INFLUXDB_INIT_ORG=univaq
       - DOCKER_INFLUXDB_INIT_BUCKET=greenhouse
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
+
     volumes:
       - ./influxdb:/var/lib/influxdb2
 
@@ -34,14 +36,14 @@ services:
       - mqtt_broker
     environment:
       - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_BUCKET=example_bucket
+      - INFLUXDB_BUCKET=greenhouse
       - INFLUXDB_ORG=univaq
-      - INFLUXDB_TOKEN=<your_token>
+      - INFLUXDB_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
       - MQTT_BROKER_HOST=mqtt_broker
       - MQTT_BROKER_PORT=1883
     volumes:
       - ./monitor:/app
-    command: python /app/monitor.py
+    command: python -u /app/monitor.py 
 
   managed_resources:
     build: ./managed_resources
@@ -53,7 +55,7 @@ services:
       - MQTT_BROKER_PORT=1883
     volumes:
       - ./managed_resources:/app
-    command: python /app/resources_simulation.py
+    command: python -u /app/resources_simulation.py
 
 volumes:
   influxdb:

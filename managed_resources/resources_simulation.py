@@ -13,21 +13,20 @@ if __name__ == '__main__':
     client_mqtt.connect("mosquitto", 1883)
     
     # Read Section info from JSON file
-    with open("section_config.json", "r") as file:
+    with open("sector_config.json", "r") as file:
         sector_data = json.load(file)
 
     # Choosing configuration to simulate
     weather_type = "Sunny"
-    sectors_conf = sector_data[weather_type]["sections"]
+    sectors_conf = sector_data[weather_type]["sectors"]
     exterior_conf = sector_data[weather_type]["exterior"]
 
     # Initilize sections array
-    sectors: List[Sector]  = []
-    
+    sectors = []
     # Load Sections
-    for sector in sector_data:
+    for sector in sectors_conf:
         new_sector = Sector(sector["name"], sector["temperature"], sector["humidity"], sector["co2_levels"], sector["light_intensity"], exterior_conf)
-        sectors.push(new_sector)
+        sectors.append(new_sector)
         
     # Run Simulation
     while True:
