@@ -17,8 +17,10 @@ def execute(client, sector):
 
     command_fan = random.choice(["ON", "OFF"])
     command_co2_injector = random.choice(["ON", "OFF"])
+    command_heater= random.choice(["ON", "OFF"])
     execution_plan["fan"] = command_fan
     execution_plan["co2_injector"] = command_co2_injector
+    execution_plan["heater"] = command_heater
     
     print(f"Publishing to {message_key}: {execution_plan}")
     client.publish(message_key, json.dumps(execution_plan))

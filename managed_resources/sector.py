@@ -3,6 +3,7 @@ import random
 # from random import randint
 from actuators_simulation.fan_simulation import FanSimulation
 from actuators_simulation.co2_injector_simulation import CO2InjectorSimulation
+from actuators_simulation.heater_simulation import HeaterSimulation
 
 
 
@@ -22,7 +23,8 @@ class Sector:
         self.light_intensity = light_intensity
         self.humidity = humidity
         self.exterior = exterior
-        self.actuators = [FanSimulation(self), CO2InjectorSimulation(self)]
+        # self.actuators = [FanSimulation(self), CO2InjectorSimulation(self)]
+        self.actuators = [HeaterSimulation(self), CO2InjectorSimulation(self)]
 
     def run_simulation(self, client: Client):
     
@@ -43,10 +45,8 @@ class Sector:
         # CO2 Adjustment
         if self.exterior["co2_levels"]["trend"] == "up":
             self.co2_levels += trend_effect*random.uniform(0.1, 1.5)  # Increase CO2
-            print("up")
         else:
             self.co2_levels -= trend_effect*random.uniform(0.1, 1.5)  # Decrease CO2
-            print("down")
 
         # Publish updated values to MQTT
         client.publish(f"greenhouse/{self.name}/temperature", self.temperature)
