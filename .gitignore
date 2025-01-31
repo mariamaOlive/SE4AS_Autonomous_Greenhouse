@@ -174,4 +174,4 @@ cython_debug/
 .DS_Store
 
 # Not upload influx data
-influxdb
+influxdb/engine
