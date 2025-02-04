@@ -45,11 +45,11 @@ class LedLightSimulation:
             self.sector.internal_light_intensity = led_intensity  
         
         self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", led_intensity)
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "ON")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/led_lights", "ON")
         self.running = True  # Mark as ON
         
     def turn_off_lights(self):
         self.internal_light_intensity = self.sector.sun_light_intensity
         self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", self.internal_light_intensity)
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "OFF")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/led_lights", "OFF")
         self.running = False  # Mark as OFF

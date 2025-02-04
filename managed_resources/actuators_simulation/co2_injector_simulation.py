@@ -38,7 +38,7 @@ class CO2InjectorSimulation:
                 self.stop_co2_injection()
 
         except json.JSONDecodeError:
-            print(f"⚠️ Error: Received invalid JSON: {payload}")
+            print(f"Error: Received invalid JSON: {payload}")
 
 
     def start_co2_injection(self):
@@ -47,12 +47,12 @@ class CO2InjectorSimulation:
             print(f"co2_injectors started in {self.sector.name}")
             Thread(target=self.co2_injection_effect).start() # Use a thread to simulate the effect
 
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", f"ON_{self.power}")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/co2_injector", "ON")
 
     def stop_co2_injection(self):
         self.running = False
         print(f"co2_injectors stopped in {self.sector.name}")
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", "OFF")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/co2_injector", "OFF")
 
     def co2_injection_effect(self):
         k = 0.03  # Efficiency factor
