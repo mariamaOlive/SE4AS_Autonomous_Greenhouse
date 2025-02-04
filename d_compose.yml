@@ -1,0 +1,79 @@
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password
+      - DOCKER_INFLUXDB_INIT_ORG=univaq
+      - DOCKER_INFLUXDB_INIT_BUCKET=greenhouse
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
+
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+
+  mqtt_broker:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/mosquitto_config:/mosquitto/config
+      - ./mosquitto/mosquitto_data:/mosquitto/data
+      - ./mosquitto/mosquitto_log:/mosquitto/log
+
+
+# MAPE-K Components
+  monitor:
+    build: ./monitor
+    container_name: monitor
+    depends_on:
+      - influxdb
+      - mqtt_broker
+      - managed_resources
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_BUCKET=greenhouse
+      - INFLUXDB_ORG=univaq
+      - INFLUXDB_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
+      - MQTT_BROKER_HOST= mqtt_broker
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./monitor:/app
+    command: python -u /app/monitor.py 
+
+  executor:
+    build: ./executor
+    container_name: executor
+    depends_on:
+      - influxdb
+      - mqtt_broker
+      - managed_resources
+    environment:
+      - MQTT_BROKER_HOST=mqtt_broker
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./executor:/app
+    command: python -u /app/executor.py 
+
+  managed_resources:
+    build: ./managed_resources
+    container_name: managed_resources
+    depends_on:
+      - mqtt_broker
+    environment:
+      - MQTT_BROKER_HOST=mqtt_broker
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./managed_resources:/app
+    command: python -u /app/resources_simulation.py
+
+volumes:
+  influxdb:
+  mosquitto_config:
+  mosquitto_data:
+  mosquitto_log:
