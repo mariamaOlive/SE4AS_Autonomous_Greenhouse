@@ -31,14 +31,15 @@ class Sector:
         self.exterior = exterior
         
         ## Actuators Simulation##
-        self.fan_simulation = FanSimulation(self)
-        self.heater_simulation = HeaterSimulation(self)
+        # self.fan_simulation = FanSimulation(self)
+        # self.heater_simulation = HeaterSimulation(self)
         self.co2_simulation = CO2InjectorSimulation(self) 
         self.pump_simulation = PumpSimulation(self)
         self.led_simulation = LedLightSimulation(self)
         self.hatch_simulation = HatchSimulation(self)
-        self.actuators = [self.fan_simulation, 
-                          self.heater_simulation,
+        self.actuators = [
+            # self.fan_simulation, 
+                        #   self.heater_simulation,
                           self.co2_simulation, 
                           self.pump_simulation, 
                           self.led_simulation, 
@@ -48,12 +49,28 @@ class Sector:
     
         trend_effect = 0.5  # Adjust sensitivity (higher = faster changes)
         
-        # Light Adjustment
+        ######### Light Adjustment #########
         self.sun_light_intensity  = self.light_simulation.get_light_intensity()
         if not (self.led_simulation.running):
             self.internal_light_intensity = self.light_simulation.get_light_intensity()
         
-        # Temperature Adjustment
+        ######### Temperature Adjustment #########
+        normalized_intensity = self.sun_light_intensity / self.light_simulation.max_intensity
+        
+        # Compute external temperature based on sunlight intensity
+        external_temperature = self.exterior["temperature"]["base"] + (normalized_intensity * self.exterior["temperature"]["max"] )
+        # Compute internal temperature with greenhouse effect
+        greenhouse_effect = 1.2  # Factor to simulate heat retention
+        self.temperature = self.temperature + ((external_temperature - self.temperature) * greenhouse_effect * 0.1)
+        # Add small random fluctuations
+        self.temperature += random.uniform(-0.5, 0.5)
+        # Round value
+        self.temperature = round(self.temperature, 2)
+        
+        
+        
+        
+        
         if self.exterior["temperature"]["trend"] == "up":
             self.temperature += trend_effect*random.uniform(0.1, 1.5)   # Increase temperature
         else:
