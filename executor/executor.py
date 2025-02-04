@@ -20,12 +20,14 @@ def execute(client, sector):
     command_heater= random.choice(["ON", "OFF"])
     command_pump= random.choice(["ON", "OFF"])
     command_lights= random.choice(["ON", "OFF"])
+    command_hatch= random.choice(["OPEN", "CLOSE"])
     
     execution_plan["fan"] = command_fan
     execution_plan["co2_injector"] = command_co2_injector
     execution_plan["heater"] = command_heater
     execution_plan["pump"] = command_pump
     execution_plan["led_lights"] = command_lights
+    execution_plan["hatch"] = command_hatch
     
     print(f"Publishing to {message_key}: {execution_plan}")
     client.publish(message_key, json.dumps(execution_plan))
