@@ -22,7 +22,7 @@ class StoreKnowledge:
         print(f"Topic {topic[2]}: {value}")
         write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
-        if topic[1]=="feedback":
+        if topic[1]=="feedback": # should be actuator 
             data_point = influxdb_client.Point("feedback_data").tag("section", topic[2]).field(topic[3], value).time(
             int(time.time()), "s")
         else:

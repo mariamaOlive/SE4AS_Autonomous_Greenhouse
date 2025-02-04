@@ -1,4 +1,5 @@
 import time
+import os
 from typing import List
 import paho.mqtt.client as mqtt
 import json
@@ -8,10 +9,12 @@ from light_simulation import LightSimulation
 
 
 if __name__ == '__main__':
+    MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
+    MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT"))
     
     # Creating MQTT client
     client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
-    client_mqtt.connect("mosquitto", 1883)
+    client_mqtt.connect(MQTT_BROKER, MQTT_PORT,60)
     
     # Read Section info from JSON file
     with open("sector_config.json", "r") as file:

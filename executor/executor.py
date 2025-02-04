@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import json
 import random
+import os
 
 
 def execute(client, sector):
@@ -34,7 +35,8 @@ def execute(client, sector):
 
 
 if __name__ == '__main__':
-
+    MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
+    MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT"))
     # Message broker connection
     client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
     client_mqtt.connect("mosquitto", 1883)

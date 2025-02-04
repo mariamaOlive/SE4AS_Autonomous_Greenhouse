@@ -1,4 +1,6 @@
 services:
+
+  # InfluxDB
   influxdb:
     image: influxdb:2.7
     container_name: influxdb
@@ -11,10 +13,13 @@ services:
       - DOCKER_INFLUXDB_INIT_ORG=univaq
       - DOCKER_INFLUXDB_INIT_BUCKET=greenhouse
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
-
     volumes:
       - ./influxdb:/var/lib/influxdb2
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.100  # Static IP for InfluxDB
 
+  # MQTT Broker (Mosquitto)
   mqtt_broker:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
@@ -26,8 +31,14 @@ services:
       - ./mosquitto/mosquitto_data:/mosquitto/data
       - ./mosquitto/mosquitto_log:/mosquitto/log
 
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.101  # Static IP for MQTT Broker
+   
 
-# MAPE-K Components
+  # MAPE-K Components
+
+  # Monitor
   monitor:
     build: ./monitor
     container_name: monitor
@@ -36,16 +47,20 @@ services:
       - mqtt_broker
       - managed_resources
     environment:
-      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_URL=http://192.168.1.100:8086
       - INFLUXDB_BUCKET=greenhouse
       - INFLUXDB_ORG=univaq
       - INFLUXDB_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
-      - MQTT_BROKER_HOST=mqtt_broker
+      - MQTT_BROKER_HOST=mosquitto
       - MQTT_BROKER_PORT=1883
     volumes:
       - ./monitor:/app
-    command: python -u /app/monitor.py 
+    command: python -u /app/monitor.py
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.102  # Static IP for Monitor
 
+  # Executor
   executor:
     build: ./executor
     container_name: executor
@@ -54,26 +69,40 @@ services:
       - mqtt_broker
       - managed_resources
     environment:
-      - MQTT_BROKER_HOST=mqtt_broker
+      - MQTT_BROKER_HOST=mosquitto
       - MQTT_BROKER_PORT=1883
     volumes:
       - ./executor:/app
-    command: python -u /app/executor.py 
+    command: python -u /app/executor.py
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.103  # Static IP for Executor
 
+  # Managed Resources
   managed_resources:
     build: ./managed_resources
     container_name: managed_resources
     depends_on:
       - mqtt_broker
     environment:
-      - MQTT_BROKER_HOST=mqtt_broker
+      - MQTT_BROKER_HOST=mosquitto
       - MQTT_BROKER_PORT=1883
     volumes:
       - ./managed_resources:/app
     command: python -u /app/resources_simulation.py
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.104  # Static IP for Managed Resources
 
 volumes:
   influxdb:
   mosquitto_config:
   mosquitto_data:
   mosquitto_log:
+
+networks:
+  greenhouse_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24  # Custom subnet for static IPs

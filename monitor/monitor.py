@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 from store_knowledge import StoreKnowledge
+import os
 
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code.is_failure:
@@ -24,6 +25,8 @@ def on_subscribe(client, userdata, mid, reason_code_list, properties):
 
 if __name__ == '__main__':
     # Start Database
+    MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
+    MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT"))
     db_knowledge = StoreKnowledge()
     
     # Start Broker Connection
@@ -31,7 +34,7 @@ if __name__ == '__main__':
     client_mqtt.on_connect = on_connect
     client_mqtt.on_message = on_message
     client_mqtt.on_subscribe = on_subscribe
-    client_mqtt.connect("mosquitto", 1883)
+    client_mqtt.connect("MQTT_BROKER", MQTT_PORT)
     
     # Start listening broker messages
     client_mqtt.loop_forever()
