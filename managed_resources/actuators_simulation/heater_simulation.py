@@ -47,12 +47,12 @@ class HeaterSimulation:
             print(f"Heater started in {self.sector.name}")
             Thread(target=self.heater_effect).start() # Use a thread to simulate the effect
 
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", f"ON_{self.power}")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/heater", f"ON")
 
     def stop_heater(self):
         self.running = False
         print(f"Heater stopped in {self.sector.name}")
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/co2_injector", "OFF")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/heater", "OFF")
 
     def heater_effect(self):
         k = 0.01  # Efficiency factor

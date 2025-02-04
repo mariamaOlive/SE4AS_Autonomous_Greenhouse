@@ -39,7 +39,7 @@ class FanSimulation:
                 self.stop_fan()
 
         except json.JSONDecodeError:
-            print(f"⚠️ Error: Received invalid JSON: {payload}")
+            print(f"Error: Received invalid JSON: {payload}")
 
 
     def start_fan(self, power):
@@ -49,13 +49,13 @@ class FanSimulation:
             print(f"Fan started in {self.sector.name} at power {self.power}")
             Thread(target=self.cooling_effect).start() # Use a thread to simulate the effect
 
-        self.client_mqtt.publish(f"feedback/{self.sector.name}/fan", f"ON_{self.power}")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/fan", f"ON")
 
 
     def stop_fan(self):
         self.running = False
         print(f"Fan stopped in {self.sector.name}")
-        self.client_mqtt.publish(f"feedback/{self.sector.name}/fan", "OFF")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/fan", "OFF")
 
 
     def cooling_effect(self):

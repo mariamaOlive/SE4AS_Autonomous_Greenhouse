@@ -47,12 +47,12 @@ class PumpSimulation:
             Thread(target=self.pump_effect).start()  # Simulate humidity increase
 
         # Publish feedback
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/pump", "ON")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/pump", "ON")
 
     def stop_pump(self):
         self.running = False
         print(f"Pump stopped in {self.sector.name}")
-        # self.client_mqtt.publish(f"feedback/{self.sector.name}/pump", "OFF")
+        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/pump", "OFF")
 
     def pump_effect(self):
         k = 0.05  # Humidity increase factor
