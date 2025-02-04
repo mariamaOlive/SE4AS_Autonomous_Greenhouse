@@ -6,6 +6,7 @@ from actuators_simulation.co2_injector_simulation import CO2InjectorSimulation
 from actuators_simulation.heater_simulation import HeaterSimulation
 from actuators_simulation.pump_simulation import PumpSimulation
 from actuators_simulation.led_lights_simulation import LedLightSimulation
+from actuators_simulation.hatch_simulation import HatchSimulation
 
 
 
@@ -35,11 +36,13 @@ class Sector:
         self.co2_simulation = CO2InjectorSimulation(self) 
         self.pump_simulation = PumpSimulation(self)
         self.led_simulation = LedLightSimulation(self)
+        self.hatch_simulation = HatchSimulation(self)
         self.actuators = [self.fan_simulation, 
                           self.heater_simulation,
                           self.co2_simulation, 
                           self.pump_simulation, 
-                          self.led_simulation]
+                          self.led_simulation, 
+                          self.hatch_simulation]
 
     def run_simulation(self, client: Client):
     
