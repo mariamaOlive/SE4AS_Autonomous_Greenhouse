@@ -15,34 +15,40 @@ class Sector:
     temperature = 0
     co2_levels = 0
     humidity = 0
-    light_intensity = 0
+    internal_light_intensity = 0
+    sun_light_intensity = 0
     exterior = {}
 
-    def __init__(self, name: str, temperature: float, co2_levels: int, humidity: int, light_intensity: int, exterior: dict, light_simulation):
+    def __init__(self, name: str, temperature: float, co2_levels: int, humidity: int, exterior: dict, light_simulation):
         self.name = name
         self.light_simulation = light_simulation
         self.co2_levels = co2_levels
         self.temperature = temperature
-        self.light_intensity = self.light_simulation.get_light_intensity()
+        self.sun_light_intensity  = self.light_simulation.get_light_intensity()
+        self.internal_light_intensity = self.sun_light_intensity
         self.humidity = humidity
         self.exterior = exterior
-        self.actuators = [FanSimulation(self),
-                          HeaterSimulation(self),
-                          CO2InjectorSimulation(self), 
-                          PumpSimulation(self),
-                          LedLightSimulation(self)]
-        # self.actuators = [HeaterSimulation(self),
-        #                 #   HeaterSimulation(self),
-        #                   CO2InjectorSimulation(self), 
-        #                   PumpSimulation(self),
-        #                   LedLightSimulation(self)]
+        
+        ## Actuators Simulation##
+        self.fan_simulation = FanSimulation(self)
+        self.heater_simulation = HeaterSimulation(self)
+        self.co2_simulation = CO2InjectorSimulation(self) 
+        self.pump_simulation = PumpSimulation(self)
+        self.led_simulation = LedLightSimulation(self)
+        self.actuators = [self.fan_simulation, 
+                          self.heater_simulation,
+                          self.co2_simulation, 
+                          self.pump_simulation, 
+                          self.led_simulation]
 
     def run_simulation(self, client: Client):
     
         trend_effect = 0.5  # Adjust sensitivity (higher = faster changes)
         
         # Light Adjustment
-        self.light_intensity = self.light_simulation.get_light_intensity()
+        self.sun_light_intensity  = self.light_simulation.get_light_intensity()
+        if not (self.led_simulation.running):
+            self.internal_light_intensity = self.light_simulation.get_light_intensity()
         
         # Temperature Adjustment
         if self.exterior["temperature"]["trend"] == "up":
@@ -69,6 +75,7 @@ class Sector:
         client.publish(f"greenhouse/{self.name}/temperature", self.temperature)
         client.publish(f"greenhouse/{self.name}/humidity", self.humidity)
         client.publish(f"greenhouse/{self.name}/co2_levels", self.co2_levels)
-        client.publish(f"greenhouse/{self.name}/light_intensity", self.light_intensity)
+        client.publish(f"greenhouse/{self.name}/sun_light_intensity", self.sun_light_intensity)
+        client.publish(f"greenhouse/{self.name}/internal_light_intensity", self.internal_light_intensity)
 
         # print(f"{self.name} - Temp: {self.temperature:.1f}°C, Humidity: {self.humidity:.1f}%, CO2: {self.co2_levels} ppm")

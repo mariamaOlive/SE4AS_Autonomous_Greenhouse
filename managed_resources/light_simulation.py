@@ -2,7 +2,7 @@ import math
 import time
 
 class LightSimulation:
-    def __init__(self, max_intensity=100000, sunrise_hour=6, sunset_hour=18, time_speedup=900):
+    def __init__(self, max_intensity=100000, sunrise_hour=6, sunset_hour=18, time_speedup=580):
         """
         Simulates natural light intensity based on time of day.
         - `time_speedup`: Higher values speed up time (e.g., 60 makes 1 real hour = 1 full day).

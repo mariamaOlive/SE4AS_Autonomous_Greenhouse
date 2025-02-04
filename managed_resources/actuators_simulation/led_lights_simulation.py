@@ -7,7 +7,6 @@ class LedLightSimulation:
     def __init__(self, sector):
         self.sector = sector
         self.running = False
-        self.fixed_led_intensity = 60000  # Fixed LED intensity when ON (in lux)
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
         self.client_mqtt.on_message = self.on_message
@@ -38,16 +37,19 @@ class LedLightSimulation:
                 self.turn_off_lights()
 
         except json.JSONDecodeError:
-            print(f"⚠️ Error: Received invalid JSON: {payload}")
+            print(f"Error: Received invalid JSON: {payload}")
 
     def turn_on_lights(self):
-        # if self.sector.light_intensity < self.fixed_led_intensity:
-        #     self.sector.light_intensity = self.fixed_led_intensity  
+        led_intensity = 60000  # Fixed LED intensity when ON (in lux)
+        if self.sector.sun_light_intensity < led_intensity:
+            self.sector.internal_light_intensity = led_intensity  
         
-        # self.client_mqtt.publish(f"greenhouse/{self.sector.name}/light_intensity", self.fixed_led_intensity)
+        self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", led_intensity)
         # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "ON")
         self.running = True  # Mark as ON
         
     def turn_off_lights(self):
+        self.internal_light_intensity = self.sector.sun_light_intensity
+        self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", self.internal_light_intensity)
         # self.client_mqtt.publish(f"feedback/{self.sector.name}/led_lights", "OFF")
         self.running = False  # Mark as OFF
