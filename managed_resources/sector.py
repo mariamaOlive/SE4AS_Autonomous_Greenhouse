@@ -31,15 +31,14 @@ class Sector:
         self.exterior = exterior
         
         ## Actuators Simulation##
-        # self.fan_simulation = FanSimulation(self)
-        # self.heater_simulation = HeaterSimulation(self)
+        self.fan_simulation = FanSimulation(self)
+        self.heater_simulation = HeaterSimulation(self)
         self.co2_simulation = CO2InjectorSimulation(self) 
         self.pump_simulation = PumpSimulation(self)
         self.led_simulation = LedLightSimulation(self)
         self.hatch_simulation = HatchSimulation(self)
-        self.actuators = [
-            # self.fan_simulation, 
-                        #   self.heater_simulation,
+        self.actuators = [ self.fan_simulation, 
+                          self.heater_simulation,
                           self.co2_simulation, 
                           self.pump_simulation, 
                           self.led_simulation, 
@@ -54,11 +53,12 @@ class Sector:
         if not (self.led_simulation.running):
             self.internal_light_intensity = self.light_simulation.get_light_intensity()
         
+        
         ######### Temperature Adjustment #########
         normalized_intensity = self.sun_light_intensity / self.light_simulation.max_intensity
         
         # Compute external temperature based on sunlight intensity
-        external_temperature = self.exterior["temperature"]["base"] + (normalized_intensity * self.exterior["temperature"]["max"] )
+        external_temperature = self.exterior["temperature"]["base"] + (normalized_intensity * self.exterior["temperature"]["max"])
         # Compute internal temperature with greenhouse effect
         greenhouse_effect = 1.2  # Factor to simulate heat retention
         self.temperature = self.temperature + ((external_temperature - self.temperature) * greenhouse_effect * 0.1)
@@ -67,29 +67,25 @@ class Sector:
         # Round value
         self.temperature = round(self.temperature, 2)
         
-        
-        
-        
-        
-        if self.exterior["temperature"]["trend"] == "up":
-            self.temperature += trend_effect*random.uniform(0.1, 1.5)   # Increase temperature
-        else:
-            self.temperature -= trend_effect*random.uniform(0.1, 1.5)  # Decrease temperature
 
-        # Humidity Adjustment
-        if self.exterior["humidity"]["trend"] == "up":
-            self.humidity += trend_effect*random.uniform(0.1, 1.5)   # Increase humidity
-        else:
-            self.humidity -= trend_effect*random.uniform(0.1, 1.5)   # Decrease humidity
+        ######### Humidity Adjustment #########
+        temp_factor = (self.temperature - self.exterior["temperature"]["base"]) / self.exterior["temperature"]["max"]
+        humidity_change = -temp_factor * 10.0  # Higher temperature lowers humidity
+        self.humidity = max(5.0, min(100.0, self.humidity + humidity_change)) 
+        # Add small random fluctuations
+        self.humidity += random.uniform(-2.0, 2.0)
         
-        self.humidity = max(0, min(self.humidity, 100))
 
-        # CO2 Adjustment
-       
-        if self.exterior["co2_levels"]["trend"] == "up":
-            self.co2_levels += random.uniform(5, 15)  # Increase CO2
-        else:
-            self.co2_levels -= random.uniform(5, 15)  # Decrease CO2
+        ######### CO2 Adjustment #########
+        co2_absorption_rate = 5.0  # Base absorption rate in ppm per cycle
+        if self.temperature > 20:
+            co2_absorption_rate *= 1.2  # Higher photosynthesis rate at warmer temperatures
+        # Adjust CO2 levels
+        self.co2_levels -= co2_absorption_rate  # No lower limit constraint
+        # Add small fluctuations due to external factors
+        self.co2_levels += random.uniform(-2.0, 2.0)
+        self.co2_levels = round(self.co2_levels, 2)
+
 
         # Publish updated values to MQTT
         client.publish(f"greenhouse/{self.name}/temperature", self.temperature)
