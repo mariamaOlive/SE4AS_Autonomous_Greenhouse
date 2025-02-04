@@ -28,7 +28,7 @@ if __name__ == '__main__':
     sectors = []
     # Load Sections
     for sector in sectors_conf:
-        new_sector = Sector(sector["name"], sector["temperature"], sector["co2_levels"], sector["humidity"], sector["light_intensity"], exterior_conf, light_simulation)
+        new_sector = Sector(sector["name"], sector["temperature"], sector["co2_levels"], sector["humidity"], exterior_conf, light_simulation)
         sectors.append(new_sector)
         
     # Run Simulation
