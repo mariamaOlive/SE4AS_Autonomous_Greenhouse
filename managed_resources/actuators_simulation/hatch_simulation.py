@@ -13,12 +13,14 @@ class HatchSimulation:
         thread = Thread(target=self.client_mqtt.loop_forever)
         thread.start()
 
+
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"Hatch in {self.sector.name} connected")
             client.subscribe(f"execute/{self.sector.name}") 
         else:
             print(f"Failed to connect hatch in {self.sector.name}, error {rc}")
+
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8")
@@ -38,10 +40,12 @@ class HatchSimulation:
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
 
+
     def open_hatch(self):
         print(f"Opening hatch in {self.sector.name}")
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/hatch", "OPEN")
         self.running = True  # Mark as OPEN
+
 
     def close_hatch(self):
         print(f"Closing hatch in {self.sector.name}")

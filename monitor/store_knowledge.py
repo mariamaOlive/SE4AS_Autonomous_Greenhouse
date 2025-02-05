@@ -7,6 +7,7 @@ class StoreKnowledge:
     
     def __init__(self):
         try:
+            # Get variable from docker compose
             self.bucket = os.environ["INFLUXDB_BUCKET"]
             self.org = os.environ["INFLUXDB_ORG"]
             self.token = os.environ["INFLUXDB_TOKEN"]
@@ -33,5 +34,4 @@ class StoreKnowledge:
             write_api.write(bucket=self.bucket, org=self.org, record=data_point)
             print("Writing in InfluxDB successfully completed!")
         except Exception as e:
-            # Gestisci eventuali errori durante la scrittura
             print(f"Error when writing to InfluxDB: {e}")

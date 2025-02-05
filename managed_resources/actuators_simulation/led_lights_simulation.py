@@ -14,12 +14,14 @@ class LedLightSimulation:
         thread = Thread(target=self.client_mqtt.loop_forever)
         thread.start()
 
+
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"LED Lights in {self.sector.name} connected")
             client.subscribe(f"execute/{self.sector.name}") 
         else:
             print(f"Failed to connect LED lights in {self.sector.name}, error {rc}")
+
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8")
@@ -39,6 +41,7 @@ class LedLightSimulation:
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
 
+
     def turn_on_lights(self):
         led_intensity = 60000  # Fixed LED intensity when ON (in lux)
         if self.sector.sun_light_intensity < led_intensity:
@@ -47,6 +50,7 @@ class LedLightSimulation:
         self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", led_intensity)
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/led_lights", "ON")
         self.running = True  # Mark as ON
+        
         
     def turn_off_lights(self):
         self.internal_light_intensity = self.sector.sun_light_intensity

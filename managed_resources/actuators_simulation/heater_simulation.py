@@ -15,12 +15,14 @@ class HeaterSimulation:
         thread = Thread(target=self.client_mqtt.loop_forever)
         thread.start()
         
+        
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"Heater in {self.sector.name} connected")
             client.subscribe(f"execute/{self.sector.name}")
         else:
             print(f"Failed to connect heater in {self.sector.name}, error {rc}")
+
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8")
@@ -30,7 +32,7 @@ class HeaterSimulation:
             data = json.loads(payload)
             command = data.get("heater")  # Extract "heater" key from JSON
 
-            print(f"CO2 injector in {self.sector.name} received command: {command}")
+            print(f"Heater in {self.sector.name} received command: {command}")
 
             if command == "ON":
                 self.start_heater() # Default power 5
@@ -38,7 +40,7 @@ class HeaterSimulation:
                 self.stop_heater()
 
         except json.JSONDecodeError:
-            print(f"⚠️ Error: Received invalid JSON: {payload}")
+            print(f"Error: Received invalid JSON: {payload}")
 
 
     def start_heater(self):
@@ -49,17 +51,19 @@ class HeaterSimulation:
 
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/heater", f"ON")
 
+
     def stop_heater(self):
         self.running = False
         print(f"Heater stopped in {self.sector.name}")
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/heater", "OFF")
+
 
     def heater_effect(self):
         k = 0.01  # Efficiency factor
 
         while self.running:
             temperature_increase = k * self.sector.temperature  
-            self.sector.temperature += temperature_increase*random.uniform(0.1, 1)  # Apply cooling
+            self.sector.temperature += temperature_increase*random.uniform(0.1, 1)  # Apply heating
             
             # Publish new value to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)

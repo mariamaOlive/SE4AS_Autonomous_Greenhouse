@@ -1,6 +1,5 @@
 from paho.mqtt.client import Client
 import random
-# from random import randint
 from actuators_simulation.fan_simulation import FanSimulation
 from actuators_simulation.co2_injector_simulation import CO2InjectorSimulation
 from actuators_simulation.heater_simulation import HeaterSimulation
@@ -44,9 +43,8 @@ class Sector:
                           self.led_simulation, 
                           self.hatch_simulation]
 
+
     def run_simulation(self, client: Client):
-    
-        trend_effect = 0.5  # Adjust sensitivity (higher = faster changes)
         
         ######### Light Adjustment #########
         self.sun_light_intensity  = self.light_simulation.get_light_intensity()
@@ -93,5 +91,3 @@ class Sector:
         client.publish(f"greenhouse/{self.name}/co2_levels", self.co2_levels)
         client.publish(f"greenhouse/{self.name}/sun_light_intensity", self.sun_light_intensity)
         client.publish(f"greenhouse/{self.name}/internal_light_intensity", self.internal_light_intensity)
-
-        # print(f"{self.name} - Temp: {self.temperature:.1f}°C, Humidity: {self.humidity:.1f}%, CO2: {self.co2_levels} ppm")

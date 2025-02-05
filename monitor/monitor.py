@@ -13,14 +13,13 @@ def on_message(client, userdata, msg):
     key = msg.topic.split("/")
     db_knowledge.writeDB(key, payload)
 
-    # print(f"{msg.topic}  -> {payload}")
-
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
     if reason_code_list[0].is_failure:
         print(f"Broker rejected you subscription: {reason_code_list[0]}")
     else:
         print(f"Broker granted the following QoS: {reason_code_list[0].value}")
+
 
 if __name__ == '__main__':
     # Start Database

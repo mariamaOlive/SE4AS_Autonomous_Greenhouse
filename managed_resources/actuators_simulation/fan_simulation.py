@@ -62,15 +62,16 @@ class FanSimulation:
         k = 0.005  # Cooling efficiency factor
 
         while self.running:
+            # Adjust Temperature
             temp_drop = -k * self.power * self.sector.temperature  # Cooling based on current temp & fan power
             self.sector.temperature += temp_drop*random.uniform(0.1, 1)  # Apply cooling
             
+            # Adjust Humidiy
             hum_drop = -k * self.power * self.sector.humidity  # Cooling based on current temp & fan power
             self.sector.humidity += hum_drop*random.uniform(0.1, 1)  # Apply cooling
 
             # Publish new temperature to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/humidity", self.sector.humidity)
-            # print(f"Fan cooling: {self.sector.name} -> Temp: {self.sector.temperature:.2f}°C")
 
             time.sleep(5)  # Update every 5 seconds
