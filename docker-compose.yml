@@ -6,11 +6,11 @@ services:
       - "8086:8086"
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=password
-      - DOCKER_INFLUXDB_INIT_ORG=univaq
-      - DOCKER_INFLUXDB_INIT_BUCKET=greenhouse
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}
 
     volumes:
       - ./influxdb:/var/lib/influxdb2
@@ -37,11 +37,11 @@ services:
       - managed_resources
     environment:
       - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_BUCKET=greenhouse
-      - INFLUXDB_ORG=univaq
-      - INFLUXDB_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
-      - MQTT_BROKER_HOST=mqtt_broker
-      - MQTT_BROKER_PORT=1883
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+      - MQTT_BROKER_HOST=${MQTT_BROKER_HOST}
+      - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./monitor:/app
     command: python -u /app/monitor.py 
@@ -54,8 +54,8 @@ services:
       - mqtt_broker
       - managed_resources
     environment:
-      - MQTT_BROKER_HOST=mqtt_broker
-      - MQTT_BROKER_PORT=1883
+      - MQTT_BROKER_HOST=${MQTT_BROKER_HOST}
+      - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./executor:/app
     command: python -u /app/executor.py 
@@ -66,8 +66,8 @@ services:
     depends_on:
       - mqtt_broker
     environment:
-      - MQTT_BROKER_HOST=mqtt_broker
-      - MQTT_BROKER_PORT=1883
+      - MQTT_BROKER_HOST=${MQTT_BROKER_HOST}
+      - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./managed_resources:/app
     command: python -u /app/resources_simulation.py
