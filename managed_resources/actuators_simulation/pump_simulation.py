@@ -18,7 +18,7 @@ class PumpSimulation:
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"Pump in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}") 
+            client.subscribe(f"greenhouse/execute/{self.sector.name}") 
         else:
             print(f"Failed to connect pump in {self.sector.name}, error {rc}")
 
@@ -32,10 +32,14 @@ class PumpSimulation:
 
             print(f"Pump in {self.sector.name} received command: {command}")
 
-            if command == "ON":
+            if not self.running and command == "ON":
                 self.start_pump()
+                self.update_knowledgeBase(command)
             elif command == "OFF":
                 self.stop_pump()
+                self.update_knowledgeBase(command) 
+            else:    
+                print(f"The Pump is already {command}")
 
         except json.JSONDecodeError:
             print(f"⚠️ Error: Received invalid JSON: {payload}")
@@ -69,3 +73,6 @@ class PumpSimulation:
             # print(f"Pump effect: {self.sector.name} -> Humidity: {self.sector.humidity:.2f}%")
 
             time.sleep(5)  # Update every 5 seconds
+            
+    def  update_knowledgeBase(self,command):
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/pump", command)

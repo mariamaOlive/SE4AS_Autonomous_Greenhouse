@@ -1,0 +1,30 @@
+{
+    "temperature": {
+        "daytime": {
+            "min": 20,
+            "max": 25
+        },
+        "nighttime": {
+            "min": 15,
+            "max": 18
+        },
+        "optimal": 20,
+        "max_limit": 30
+    },
+    "humidity": {
+        "min": 50,
+        "max": 60,
+        "optimal": 55
+    },
+    "CO2": {
+        "min": 800,
+        "max": 1200,
+        "optimal": 1000
+    },
+    "light_intensity": {
+        "min_lux": 20000,
+        "max_lux": 25000,
+        "optimal_lux": 22500
+        
+    }
+}

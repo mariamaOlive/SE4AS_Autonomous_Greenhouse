@@ -1,3 +1,4 @@
+
 services:
 
   # InfluxDB
@@ -30,13 +31,9 @@ services:
       - ./mosquitto/mosquitto_config:/mosquitto/config
       - ./mosquitto/mosquitto_data:/mosquitto/data
       - ./mosquitto/mosquitto_log:/mosquitto/log
-
     networks:
       greenhouse_network:
         ipv4_address: 192.168.1.101  # Static IP for MQTT Broker
-   
-
-  # MAPE-K Components
 
   # Monitor
   monitor:
@@ -60,6 +57,42 @@ services:
       greenhouse_network:
         ipv4_address: 192.168.1.102  # Static IP for Monitor
 
+  # analyser
+  analyzer:
+    build: ./analyzer
+    container_name: analyser
+    depends_on:
+      - mqtt_broker
+      - knowledge_service
+    environment:
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./analyzer:/app
+    command: python -u /app/analyzer.py -f /app/greenhouse_threshold.json
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.103  # Static IP for Analyser
+
+  #planner
+  planner:
+    build: ./planner
+    container_name: planner
+    depends_on:
+      - mqtt_broker
+      - knowledge_service
+      - analyzer
+    environment:
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./planner:/app
+    command: python -u /app/planner.py
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.104 # static ip address for planner.
+     
+
   # Executor
   executor:
     build: ./executor
@@ -76,7 +109,25 @@ services:
     command: python -u /app/executor.py
     networks:
       greenhouse_network:
-        ipv4_address: 192.168.1.103  # Static IP for Executor
+        ipv4_address: 192.168.1.105  # Static IP for Executor
+
+  # Knowledge Service
+  knowledge_service:
+    build: ./Knowledge
+    container_name: knowledge_manager
+    environment:
+      - INFLUXDB_URL=http://192.168.1.100:8086  # Fixed the extra space
+      - INFLUXDB_BUCKET=greenhouse
+      - INFLUXDB_ORG=univaq
+      - INFLUXDB_TOKEN=KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+    volumes:
+      - ./shared_config:/shared_config
+    networks:
+      greenhouse_network:
+        ipv4_address: 192.168.1.106  # Static IP for Knowledge Service
+    restart: always
 
   # Managed Resources
   managed_resources:
@@ -92,7 +143,7 @@ services:
     command: python -u /app/resources_simulation.py
     networks:
       greenhouse_network:
-        ipv4_address: 192.168.1.104  # Static IP for Managed Resources
+        ipv4_address: 192.168.1.107  # Static IP for Managed Resources
 
 volumes:
   influxdb:

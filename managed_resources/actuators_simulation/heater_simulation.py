@@ -18,7 +18,7 @@ class HeaterSimulation:
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"Heater in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}")
+            client.subscribe(f"greenhouse/execute/{self.sector.name}")
         else:
             print(f"Failed to connect heater in {self.sector.name}, error {rc}")
 
@@ -30,12 +30,16 @@ class HeaterSimulation:
             data = json.loads(payload)
             command = data.get("heater")  # Extract "heater" key from JSON
 
-            print(f"CO2 injector in {self.sector.name} received command: {command}")
+            print(f"heater in {self.sector.name} received command: {command}")
 
-            if command == "ON":
+            if not self.running and command == "ON":
                 self.start_heater() # Default power 5
-            elif command == "OFF":
+                self.update_knowledgeBase(command)
+            elif self.running and command == "OFF":
                 self.stop_heater()
+                self.update_knowledgeBase(command)
+            else:    
+                print(f"The Heater is already {command}")   
 
         except json.JSONDecodeError:
             print(f"⚠️ Error: Received invalid JSON: {payload}")
@@ -64,3 +68,6 @@ class HeaterSimulation:
             # Publish new value to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
             time.sleep(5)  # Update every 5 seconds
+            
+    def  update_knowledgeBase(self, command):
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/heater", command)

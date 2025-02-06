@@ -88,10 +88,10 @@ class Sector:
 
 
         # Publish updated values to MQTT
-        client.publish(f"greenhouse/{self.name}/temperature", self.temperature)
-        client.publish(f"greenhouse/{self.name}/humidity", self.humidity)
-        client.publish(f"greenhouse/{self.name}/co2_levels", self.co2_levels)
-        client.publish(f"greenhouse/{self.name}/sun_light_intensity", self.sun_light_intensity)
-        client.publish(f"greenhouse/{self.name}/internal_light_intensity", self.internal_light_intensity)
+        client.publish(f"greenhouse/sensor_raw/{self.name}/temperature", self.temperature)
+        client.publish(f"greenhouse/sensor_raw/{self.name}/humidity", self.humidity)
+        client.publish(f"greenhouse/sensor_raw/{self.name}/co2_levels", self.co2_levels)
+        client.publish(f"greenhouse/sensor_raw/{self.name}/sun_light_intensity", self.sun_light_intensity)
+        client.publish(f"greenhouse/sensor_raw/{self.name}/internal_light_intensity", self.internal_light_intensity)
 
         # print(f"{self.name} - Temp: {self.temperature:.1f}°C, Humidity: {self.humidity:.1f}%, CO2: {self.co2_levels} ppm")

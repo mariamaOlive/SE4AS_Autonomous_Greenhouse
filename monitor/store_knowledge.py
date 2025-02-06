@@ -19,14 +19,14 @@ class StoreKnowledge:
 
     def writeDB(self, topic, value):
         
-        print(f"Topic {topic[2]}: {value}")
+        print(f"Topic {topic[-1]}: {value}")
         write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
-        if topic[1]=="feedback":
+        if topic[1]=="feedback": #modify to actuator status not feedback
             data_point = influxdb_client.Point("feedback_data").tag("section", topic[2]).field(topic[3], value).time(
             int(time.time()), "s")
         else:
-            data_point = influxdb_client.Point("sensor_data").tag("section", topic[1]).field(topic[2], float(value)).time(
+            data_point = influxdb_client.Point("sensor_data").tag("section", topic[2]).field(topic[3], float(value)).time(
             int(time.time()), "s")
 
         try:

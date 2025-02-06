@@ -18,7 +18,7 @@ class FanSimulation:
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"Fan in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}")
+            client.subscribe(f"greenhouse/execute/{self.sector.name}")
         else:
             print(f"Failed to connect fan in {self.sector.name}, error {rc}")
 
@@ -33,10 +33,14 @@ class FanSimulation:
 
             print(f"Fan in {self.sector.name} received command: {command}")
 
-            if command == "ON":
+            if not self.running and command == "ON":
                 self.start_fan(10)  # Default power 5
-            elif command == "OFF":
+                self.update_knowledgeBase(command)
+            elif self.running and command == "OFF":
                 self.stop_fan()
+                self.update_knowledgeBase(command)
+            else:
+                print(f"The Fan is already {command}")
 
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
@@ -74,3 +78,7 @@ class FanSimulation:
             # print(f"Fan cooling: {self.sector.name} -> Temp: {self.sector.temperature:.2f}°C")
 
             time.sleep(5)  # Update every 5 seconds
+
+        
+    def update_knowledgeBase(self,command):
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", command)

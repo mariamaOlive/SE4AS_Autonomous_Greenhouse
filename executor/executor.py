@@ -5,44 +5,88 @@ import random
 import os
 
 
-def execute(client, sector):
-    execution_plan = {}
-    
-    # fan - : on/off
-    # heater - : on/off
-    # Hatches  - : open/close
-    # pumps  - : on/off
-    # led_lights  - : on/off
-    # co2_injectors: on/of
-    message_key = f"execute/{sector}" 
+# MQTT setup
+MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
+MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", 1883))
+client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
-    command_fan = random.choice(["ON", "OFF"])
-    command_co2_injector = random.choice(["ON", "OFF"])
-    command_heater= random.choice(["ON", "OFF"])
-    command_pump= random.choice(["ON", "OFF"])
-    command_lights= random.choice(["ON", "OFF"])
-    command_hatch= random.choice(["OPEN", "CLOSE"])
-    
-    execution_plan["fan"] = command_fan
-    execution_plan["co2_injector"] = command_co2_injector
-    execution_plan["heater"] = command_heater
-    execution_plan["pump"] = command_pump
-    execution_plan["led_lights"] = command_lights
-    execution_plan["hatch"] = command_hatch
-    
-    print(f"Publishing to {message_key}: {execution_plan}")
-    client.publish(message_key, json.dumps(execution_plan))
 
+class Executor:
+    def __init__(self):
+        self.current_actuator_state = {}
+        
+        self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
+        self.client_mqtt.on_connect = self.on_connect
+        self.client_mqtt.on_message = self.on_message
+        self.client_mqtt.on_subscribe = self.on_subscribe
+        
+        self.execution_command = {}
+        # Connect to the MQTT broker
+        self.client_mqtt.connect(MQTT_BROKER, MQTT_PORT)
+
+        # Start the MQTT loop in the background using loop_start()
+        self.client_mqtt.loop_start()  # Non-blocking loop to process incoming messages
+
+        
+
+    def on_connect(self, client, userdata, flags, reason_code, properties):
+        '''Callback function for when the client receives a CONNACK response from the server.'''
+        if reason_code == 0:
+            print("Connected to MQTT Broker!")
+            self.client_mqtt.subscribe("greenhouse/planner_strategy/#")  # Subscribe to the raw sensor data topics
+        else:
+            print(f"Failed to connect: {reason_code}")
+            
+    def on_message(self, client, userdata, msg):
+        '''Callback function for when a PUBLISH message is received from the server.'''
+        print(f"Received message on topic {msg.topic}: {msg.payload}")
+        payload = json.loads(msg.payload)
+        
+        self.execution_command = payload
+        self.process_commands_from_planner()
+        
+        
+    def on_subscribe(self, client, userdata, mid, reason_code_list, properties):
+        '''Callback function for when the client receives a SUBACK response from the server.'''
+        if reason_code_list[0].is_failure:
+            print(f"Broker rejected your subscription: {reason_code_list[0]}")
+        else:
+            print(f"Broker granted the following QoS: {reason_code_list[0].value}")
+    
+    def execute(self, sector):
+        execution_plan = self.execution_command[sector]
+        
+        topic = f"greenhouse/execute/{sector}"
+        self.client_mqtt.publish(topic, json.dumps(execution_plan), qos=2)
+        print(f"Sent execution plan for {sector}: {execution_plan}")  
+        
+    def process_commands_from_planner(self,):
+        for sector in self.execution_command.keys():
+            self.execute(sector)
+            
+            
+        
+          
+    def random_executor(self,sector):
+
+        command_fan = random.choice(["ON", "OFF"])
+        command_co2_injector = random.choice(["ON", "OFF"])
+        command_heater= random.choice(["ON", "OFF"])
+        command_pump= random.choice(["ON", "OFF"])
+        command_lights= random.choice(["ON", "OFF"])
+        command_hatch= random.choice(["OPEN", "CLOSE"])
+
+        return {
+            "fan": command_fan,
+            "co2_injector": command_co2_injector,
+            "heater": command_heater,
+            "pump": command_pump,
+            "led_lights": command_lights,
+            "hatch": command_hatch,
+        }
 
 if __name__ == '__main__':
-    MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
-    MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT"))
-    # Message broker connection
-    client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
-    client_mqtt.connect("mosquitto", 1883)
-    
-    
-    #REMOVE: Here for testing pur
+    executor = Executor()
     with open("sector_config.json", "r") as file:
         sector_data = json.load(file)
     weather_type = "Sunny"
@@ -51,6 +95,4 @@ if __name__ == '__main__':
 
 
     while True:
-        for sector in sectors_conf:
-            execute(client_mqtt, sector["name"])
-        time.sleep(60)
+        time.sleep(1)

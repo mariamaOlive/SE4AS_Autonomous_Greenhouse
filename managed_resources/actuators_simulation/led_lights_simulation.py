@@ -17,7 +17,7 @@ class LedLightSimulation:
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"LED Lights in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}") 
+            client.subscribe(f"greenhouse/execute/{self.sector.name}") 
         else:
             print(f"Failed to connect LED lights in {self.sector.name}, error {rc}")
 
@@ -31,10 +31,14 @@ class LedLightSimulation:
 
             print(f"LED Lights in {self.sector.name} received command: {command}")
 
-            if command == "ON":
+            if not self.running and command == "ON":
                 self.turn_on_lights()
-            elif command == "OFF":
+                self.update_knowledgeBase(command)
+            elif self.running and command == "OFF":
                 self.turn_off_lights()
+                self.update_knowledgeBase(command)
+            else:
+                print(f"The LED Lights are already {command}") 
 
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
@@ -53,3 +57,7 @@ class LedLightSimulation:
         self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", self.internal_light_intensity)
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/led_lights", "OFF")
         self.running = False  # Mark as OFF
+        
+    def  update_knowledgeBase(self,command):
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/led_lights", command)
+        

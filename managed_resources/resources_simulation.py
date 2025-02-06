@@ -39,6 +39,6 @@ if __name__ == '__main__':
         for sector in sectors:
             sector.run_simulation(client_mqtt)
             
-        time.sleep(10)
+        time.sleep(5)
 
 

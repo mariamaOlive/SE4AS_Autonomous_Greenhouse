@@ -1,0 +1,60 @@
+{
+    "Sunny": {
+        "exterior": {
+            "temperature": {"base": 20.0, "max": 35},
+            "light_intensity": {"value": 100000}
+        },
+        "sectors": [
+            {
+                "name": "North Section",
+                "temperature": 25,
+                "humidity": 45,
+                "co2_levels": 420,
+                "light_intensity": 95000
+            },
+            {
+                "name": "South Section",
+                "temperature": 26,
+                "humidity": 42,
+                "co2_levels": 430,
+                "light_intensity": 98000
+            },
+            {
+                "name": "West Section",
+                "temperature": 25.5,
+                "humidity": 47,
+                "co2_levels": 415,
+                "light_intensity": 91000
+            }
+        ]
+    },
+    "Very Cold": {
+        "exterior": {
+            "temperature": {"base": -2.0, "max": 15},
+            "light_intensity": {"value": 50000}
+        },
+        "sectors": [
+            {
+                "name": "North Section",
+                "temperature": 5.2,
+                "humidity": 55,
+                "co2_levels": 410,
+                "light_intensity": 25000
+            },
+            {
+                "name": "South Section",
+                "temperature": 6.0,
+                "humidity": 50,
+                "co2_levels": 420,
+                "light_intensity": 27000
+            },
+            {
+                "name": "West Section",
+                "temperature": 4.8,
+                "humidity": 57,
+                "co2_levels": 405,
+                "light_intensity": 23000
+            }
+        ]
+    }
+}

@@ -175,3 +175,6 @@ cython_debug/
 
 # Not upload influx data
 influxdb/engine
+
+
+test.ipynb

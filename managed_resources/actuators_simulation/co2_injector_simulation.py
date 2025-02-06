@@ -8,6 +8,7 @@ class CO2InjectorSimulation:
     def __init__(self, sector):
         self.sector = sector
         self.running = False
+        
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
         self.client_mqtt.on_message = self.on_message
@@ -18,7 +19,7 @@ class CO2InjectorSimulation:
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"CO2 Injector in {self.sector.name} connected")
-            client.subscribe(f"execute/{self.sector.name}")
+            client.subscribe(f"greenhouse/execute/{self.sector.name}")
         else:
             print(f"Failed to connect co2_injectors in {self.sector.name}, error {rc}")
 
@@ -32,10 +33,14 @@ class CO2InjectorSimulation:
 
             print(f"CO2 injector in {self.sector.name} received command: {command}")
 
-            if command == "ON":
+            if not self.running and command == "ON":
                 self.start_co2_injection() # Default power 5
-            elif command == "OFF":
+                self.update_knowledgeBase(command)
+            elif self.running and command == "OFF":
                 self.stop_co2_injection()
+                self.update_knowledgeBase(command)
+            else:
+                print(f"The Co2 Injector is already {command}")
 
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
@@ -64,3 +69,6 @@ class CO2InjectorSimulation:
             # Publish new value to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/co2_levels", self.sector.co2_levels)
             time.sleep(5)  # Update every 5 seconds
+    
+    def update_knowledgeBase(self,command):
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_levels", command)
