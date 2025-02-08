@@ -8,9 +8,10 @@
             {
                 "name": "North Section",
                 "temperature": 25,
-                "humidity": 45,
+                "humidity": 30,
                 "co2_levels": 420,
                 "light_intensity": 95000
+                
             },
             {
                 "name": "South Section",

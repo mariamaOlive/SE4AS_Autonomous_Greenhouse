@@ -31,9 +31,9 @@ class Planner:
        
         self.prev_actuator_change_status = {}
         self.current_actuator_change_status = {}
-        self.current_actuator_state = {"North Section": {"co2_levels": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}, 
-                                            "South Section": {"co2_levels": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}, 
-                                            "West Section": {"co2_levels": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}}
+        self.current_actuator_state = {"North Section": {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}, 
+                                            "South Section": {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}, 
+                                            "West Section": {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}}
         
         
         self.prev_env_var_status = {'North Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'},  
@@ -105,7 +105,13 @@ class Planner:
     
     def set_sensor_current_state(self,section,payload):
         if section not in self.current_actuator_state:
-            self.current_actuator_state[section] = {}  # Initialize the section if it doesn't exist
+            self.current_actuator_state[section] = {"co2_injector": "OFF", 
+                                                    "fan": "OFF",
+                                                    "hatch": "CLOSE",
+                                                    "heater": "OFF", 
+                                                    "led_lights": "OFF", 
+                                                    "pump": "OFF"}
+            # Initialize the section if it doesn't exist
             
         self.current_actuator_state[section] = payload
 
@@ -168,7 +174,7 @@ class Planner:
                     self.actuator_command[section][actuator] = self.current_actuator_state[section][actuator]   
         for section in self.actuator_command.keys():
             topic = f"greenhouse/planner_strategy/{section}"
-            payload = json.dumps({"command": self.actuator_command})
+            payload = json.dumps(self.actuator_command[section])
             self.client_mqtt.publish(topic, payload)
             print(f"Sent command to {topic}: {payload}")
 

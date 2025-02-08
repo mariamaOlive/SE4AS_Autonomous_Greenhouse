@@ -41,9 +41,10 @@ class Executor:
         '''Callback function for when a PUBLISH message is received from the server.'''
         print(f"Received message on topic {msg.topic}: {msg.payload}")
         payload = json.loads(msg.payload)
-        
-        self.execution_command = payload
-        self.process_commands_from_planner()
+        topic_parts = msg.topic.split("/")
+        section= topic_parts[2]
+        self.execution_command[section] = payload
+        self.execute(section)
         
         
     def on_subscribe(self, client, userdata, mid, reason_code_list, properties):
@@ -53,16 +54,14 @@ class Executor:
         else:
             print(f"Broker granted the following QoS: {reason_code_list[0].value}")
     
-    def execute(self, sector):
-        execution_plan = self.execution_command[sector]
+    def execute(self, section):
+        execution_plan = self.execution_command[section]
         
-        topic = f"greenhouse/execute/{sector}"
+        topic = f"greenhouse/execute/{section}"
         self.client_mqtt.publish(topic, json.dumps(execution_plan), qos=2)
-        print(f"Sent execution plan for {sector}: {execution_plan}")  
+        print(f"Sent execution plan for {section}: {execution_plan}")  
         
-    def process_commands_from_planner(self,):
-        for sector in self.execution_command.keys():
-            self.execute(sector)
+  
             
             
         
@@ -87,12 +86,5 @@ class Executor:
 
 if __name__ == '__main__':
     executor = Executor()
-    with open("sector_config.json", "r") as file:
-        sector_data = json.load(file)
-    weather_type = "Sunny"
-    sectors_conf = sector_data[weather_type]["sectors"]
-    exterior_conf = sector_data[weather_type]["exterior"]
-
-
     while True:
         time.sleep(1)

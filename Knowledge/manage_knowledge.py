@@ -106,11 +106,10 @@ class Knowledge:
         """Query to get the last 5 values for both sensor data and actuator data"""
         query = f"""
                 from(bucket: "{self.bucket}")
-                    |> range(start: -5h)  
+                    |> range(start: -5m)  
                     |> filter(fn: (r) => r["_measurement"] == "sensor_data" )
-                    |> sort(columns: ["_time"], desc: true) 
                     |> group(columns: ["_measurement", "_field", "section"])  
-                    |> tail(n: 5)  
+                    |> tail(n: 3) 
             """
 
 
@@ -166,31 +165,43 @@ class Knowledge:
                 print('Last actuators state are unknown at the moment')
 
             # Now, publish each last update for all fields and sections
-            for section, field_values in actuator_state.items():
-                # Construct the MQTT topic for the section
-                topic = f"greenhouse/last_updates/{section}/actuators"
+            try:
+                for section, field_values in actuator_state.items():
+                    # Construct the MQTT topic for the section
+                    topic = f"greenhouse/last_updates/{section}/actuators"
 
-                # Create the payload to include all fields and their latest values
-                payload = {
-                    field: value for field, value in field_values.items()
-                }
+                    # Create the payload to include all fields and their latest values
+                    payload = {
+                        field: value for field, value in field_values.items()
+                    }
 
-                # Publish the aggregated data (last updates) to the MQTT topic
-                self.mqtt_client.publish(topic, payload=json.dumps(payload))
-                print(f"Published last updates for {section} to {topic}: {payload}")
+                    # Publish the aggregated data (last updates) to the MQTT topic
+                    self.mqtt_client.publish(topic, payload=json.dumps(payload))
+                    print(f"Published last updates for {section} to {topic}: {payload}")
+            except ValueError as e:
+                print(f"Error when publishing last actuator state: {e}")
+            except Exception as e:
+                print(f"Error when publishing last actuator state: {e}")
                 
-            for section, field_values in last_updates.items():
-                # Construct the MQTT topic for the section
-                topic = f"greenhouse/last_updates/{section}/sensors"
+           
+           
+            try:        
+                for section, field_values in last_updates.items():
+                    # Construct the MQTT topic for the section
+                    topic = f"greenhouse/last_updates/{section}/sensors"
 
-                # Create the payload to include all fields and their latest values
-                payload = {
-                    field: value for field, value in field_values.items()
-                }
+                    # Create the payload to include all fields and their latest values
+                    payload = {
+                        field: value for field, value in field_values.items()
+                    }
 
-                # Publish the aggregated data (last updates) to the MQTT topic
-                self.mqtt_client.publish(topic, payload=json.dumps(payload))
-                print(f"Published last updates for {section} to {topic}: {payload}")
+                    # Publish the aggregated data (last updates) to the MQTT topic
+                    self.mqtt_client.publish(topic, payload=json.dumps(payload))
+                    print(f"Published last updates for {section} to {topic}: {payload}")
+            except ValueError as e:
+                print(f"Error when publishing last updates: {e}")  
+            except Exception as e:
+                print(f"Error when publishing last updates: {e}")
 
             # Sleep for 20 seconds before fetching and publishing again
             time.sleep(5)
@@ -199,7 +210,7 @@ class Knowledge:
         """Query to get the last actuator state for a given section and actuator, including the time"""
         query = f"""
                 from(bucket: "{self.bucket}")
-                    |> range(start: -5h)  
+                    |> range(start: -5m)  
                     |> filter(fn: (r) => r["_measurement"] == "actuator_state")    
                     |> sort(columns: ["_time"], desc: true) 
                     |> group(columns: ["_measurement", "_field", "section"])  

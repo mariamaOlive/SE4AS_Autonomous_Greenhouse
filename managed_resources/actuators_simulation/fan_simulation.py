@@ -33,14 +33,10 @@ class FanSimulation:
 
             print(f"Fan in {self.sector.name} received command: {command}")
 
-            if not self.running and command == "ON":
+            if command == "ON":
                 self.start_fan(10)  # Default power 5
-                self.update_knowledgeBase(command)
-            elif self.running and command == "OFF":
+            elif command == "OFF":
                 self.stop_fan()
-                self.update_knowledgeBase(command)
-            else:
-                print(f"The Fan is already {command}")
 
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
@@ -54,31 +50,31 @@ class FanSimulation:
             Thread(target=self.cooling_effect).start() # Use a thread to simulate the effect
 
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/fan", f"ON")
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", f"ON")
+
 
 
     def stop_fan(self):
         self.running = False
         print(f"Fan stopped in {self.sector.name}")
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/fan", "OFF")
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", "OFF")
 
 
     def cooling_effect(self):
         k = 0.005  # Cooling efficiency factor
 
         while self.running:
+            # Adjust Temperature
             temp_drop = -k * self.power * self.sector.temperature  # Cooling based on current temp & fan power
             self.sector.temperature += temp_drop*random.uniform(0.1, 1)  # Apply cooling
             
+            # Adjust Humidiy
             hum_drop = -k * self.power * self.sector.humidity  # Cooling based on current temp & fan power
             self.sector.humidity += hum_drop*random.uniform(0.1, 1)  # Apply cooling
 
             # Publish new temperature to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/humidity", self.sector.humidity)
-            # print(f"Fan cooling: {self.sector.name} -> Temp: {self.sector.temperature:.2f}°C")
 
             time.sleep(5)  # Update every 5 seconds
-
-        
-    def update_knowledgeBase(self,command):
-        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", command)

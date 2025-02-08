@@ -117,10 +117,34 @@ class Analyzer:
             self.publish_state_change(section=topic_part[2])
         
     def get_slope(self, values):
-        x = np.arange(len(values))
-        slope, _ = np.polyfit(x, values, 1)  # Calculate linear regression
         
-        return slope
+        values = np.array(values, dtype=np.float64)
+
+        # 🛠️ Step 1: Check for empty input
+        if values.size < 2:
+            print("Warning: Not enough data points for regression.")
+            slope = 0.0
+
+        # 🛠️ Step 2: Remove NaN and Inf values
+        valid_mask = np.isfinite(values)  # Creates a mask for valid numbers
+        values = values[valid_mask]
+
+        if values.size < 2:
+            print("Warning: All data points are invalid (NaN or Inf).")
+            slope = 0.0
+            
+        x = np.arange(len(values))
+        
+        try:
+            slope, _ = np.polyfit(x, values, 1)  # Calculate slope
+            
+        except np.linalg.LinAlgError as e:
+            print(f"Error: {e} - Unable to compute regression.")
+            slope = 0.0
+        finally:
+            
+            return slope        
+   
         
     def get_daytime_or_nighttime(self, section, daytime_threshold=5000):
         """
@@ -130,6 +154,9 @@ class Analyzer:
         :param daytime_threshold: The threshold above which it's considered daytime.
         :return: 'Daytime' if sunlight_value > daytime_threshold, 'Nighttime' otherwise.
         """
+        if 'sun_light_intensity' not in self.green_house_history[section]:
+            print("Sunlight data not available yet")
+            return
         sunlight_values = self.green_house_history[section]['sun_light_intensity']
 
         slope = self.get_slope(sunlight_values)  # Calculate linear regression
@@ -148,9 +175,9 @@ class Analyzer:
         slope = self.get_slope(temperature_values)
         last_temperature = temperature_values[-1]
 
-        if slope > 0.2:
+        if slope > 0:
             temperature_state = 'Increasing'
-        elif slope < -0.2:
+        elif slope < 0:
             temperature_state = 'Decreasing' 
         else:
             temperature_state = 'Stable'
@@ -195,9 +222,9 @@ class Analyzer:
         '''Get the status of the environment variable'''
         if last_value < thresholds['min']:
             return 'too_low'
-        elif last_value < thresholds['optimal'] - 1:
+        elif last_value < thresholds['optimal'] - int(thresholds['optimal'] - thresholds['min'])/3:
             return 'low'
-        elif last_value <= thresholds['optimal'] + 1:
+        elif last_value <= thresholds['optimal'] + int(thresholds['max'] - thresholds['optimal'])/3:
             return 'optimal'
         elif last_value <= thresholds['max']:
             return 'high'

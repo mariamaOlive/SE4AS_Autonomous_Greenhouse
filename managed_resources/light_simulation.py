@@ -29,5 +29,7 @@ class LightSimulation:
 
         # Sinusoidal function for light intensity
         light_intensity = self.max_intensity * max(0, math.sin(math.pi * normalized_time))
+        
+         # Factor to simulate shading from clouds, etc.
 
         return round(light_intensity, 2)

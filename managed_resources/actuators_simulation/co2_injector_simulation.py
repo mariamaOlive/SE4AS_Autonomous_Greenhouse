@@ -8,7 +8,6 @@ class CO2InjectorSimulation:
     def __init__(self, sector):
         self.sector = sector
         self.running = False
-        
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
         self.client_mqtt.on_message = self.on_message
@@ -33,14 +32,10 @@ class CO2InjectorSimulation:
 
             print(f"CO2 injector in {self.sector.name} received command: {command}")
 
-            if not self.running and command == "ON":
+            if command == "ON":
                 self.start_co2_injection() # Default power 5
-                self.update_knowledgeBase(command)
-            elif self.running and command == "OFF":
+            elif command == "OFF":
                 self.stop_co2_injection()
-                self.update_knowledgeBase(command)
-            else:
-                print(f"The Co2 Injector is already {command}")
 
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
@@ -53,14 +48,17 @@ class CO2InjectorSimulation:
             Thread(target=self.co2_injection_effect).start() # Use a thread to simulate the effect
 
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/co2_injector", "ON")
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_injector", "ON")
+
 
     def stop_co2_injection(self):
         self.running = False
         print(f"co2_injectors stopped in {self.sector.name}")
         self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/co2_injector", "OFF")
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_injector", "OFF")
 
     def co2_injection_effect(self):
-        k = 0.03  # Efficiency factor
+        k = 0.05  # Efficiency factor
 
         while self.running:
             co2_increase = k * self.sector.co2_levels  
@@ -69,6 +67,3 @@ class CO2InjectorSimulation:
             # Publish new value to MQTT
             self.client_mqtt.publish(f"greenhouse/{self.sector.name}/co2_levels", self.sector.co2_levels)
             time.sleep(5)  # Update every 5 seconds
-    
-    def update_knowledgeBase(self,command):
-        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_levels", command)

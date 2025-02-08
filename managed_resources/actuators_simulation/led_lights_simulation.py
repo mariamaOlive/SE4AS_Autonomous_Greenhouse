@@ -6,6 +6,7 @@ import json
 class LedLightSimulation:
     def __init__(self, sector):
         self.sector = sector
+        self.LED_INTENSITY = 22600 # Fixed LED intensity when ON (in lux)
         self.running = False
         self.client_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, reconnect_on_failure=True)
         self.client_mqtt.on_connect = self.on_connect
@@ -14,12 +15,14 @@ class LedLightSimulation:
         thread = Thread(target=self.client_mqtt.loop_forever)
         thread.start()
 
+
     def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print(f"LED Lights in {self.sector.name} connected")
             client.subscribe(f"greenhouse/execute/{self.sector.name}") 
         else:
             print(f"Failed to connect LED lights in {self.sector.name}, error {rc}")
+
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8")
@@ -31,33 +34,56 @@ class LedLightSimulation:
 
             print(f"LED Lights in {self.sector.name} received command: {command}")
 
-            if not self.running and command == "ON":
+            if command == "ON":
                 self.turn_on_lights()
-                self.update_knowledgeBase(command)
-            elif self.running and command == "OFF":
+            elif command == "OFF":
                 self.turn_off_lights()
-                self.update_knowledgeBase(command)
-            else:
-                print(f"The LED Lights are already {command}") 
 
         except json.JSONDecodeError:
             print(f"Error: Received invalid JSON: {payload}")
 
+
     def turn_on_lights(self):
-        led_intensity = 60000  # Fixed LED intensity when ON (in lux)
-        if self.sector.sun_light_intensity < led_intensity:
-            self.sector.internal_light_intensity = led_intensity  
-        
-        self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", led_intensity)
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/led_lights", "ON")
-        self.running = True  # Mark as ON
+        """Activates LED lights and increases internal light intensity smoothly."""
+        if not self.running:
+            self.running = True
+            print(f"LED Lights in {self.sector.name} turned ON.")
+
+        self.set_led_light_intensity()
         
     def turn_off_lights(self):
-        self.internal_light_intensity = self.sector.sun_light_intensity
-        self.client_mqtt.publish(f"greenhouse/{self.sector.name}/internal_light_intensity", self.internal_light_intensity)
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/led_lights", "OFF")
-        self.running = False  # Mark as OFF
+        """Deactivates LED lights and gradually decreases internal light intensity."""
+        if self.running:
+            self.running = False
+            print(f"LED Lights in {self.sector.name} turned OFF.")
+
+        self.set_led_light_intensity()
+
+    def set_led_light_intensity(self):
+        """Smoothly adjusts the internal light intensity based on LED and Sunlight conditions."""
         
-    def  update_knowledgeBase(self,command):
-        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/led_lights", command)
+        greenhouse_sunlight_intensity = self.sector.sun_light_intensity * self.sector.shading_factor
+
+        if self.running and greenhouse_sunlight_intensity < self.LED_INTENSITY:
+            self.sector.internal_light_intensity = self.LED_INTENSITY
+        else:
+            self.sector.internal_light_intensity = greenhouse_sunlight_intensity
+        # round to 2 decimal places
+        self.sector.internal_light_intensity = round(self.sector.internal_light_intensity, 2)
+
+        # Publish updated intensity
+        self.publish_status("ON" if self.running else "OFF")
         
+    def publish_status(self, status):
+        self.client_mqtt.publish(
+            f"greenhouse/{self.sector.name}/internal_light_intensity",
+            self.sector.internal_light_intensity,
+        )
+        self.client_mqtt.publish(
+            f"greenhouse/feedback/{self.sector.name}/led_lights", status
+        )
+        self.client_mqtt.publish(
+            f"greenhouse/actuator_status/{self.sector.name}/led_lights", status
+        )
+  
+

@@ -20,15 +20,15 @@ class Sector:
     sun_light_intensity = 0
     exterior = {}
 
-    def __init__(self, name: str, temperature: float, co2_levels: int, humidity: int, exterior: dict, light_simulation):
+    def __init__(self, name: str, temperature: float, co2_levels: int, humidity: int, exterior: dict, light_simulation,shading_factor):
         self.name = name
         self.light_simulation = light_simulation
         self.co2_levels = co2_levels
         self.temperature = temperature
-        self.sun_light_intensity  = self.light_simulation.get_light_intensity()
-        self.internal_light_intensity = self.sun_light_intensity
+        self.sun_light_intensity  = self.light_simulation.get_light_intensity() 
         self.humidity = humidity
         self.exterior = exterior
+        self.shading_factor = shading_factor
         
         ## Actuators Simulation##
         self.fan_simulation = FanSimulation(self)
@@ -43,15 +43,21 @@ class Sector:
                           self.pump_simulation, 
                           self.led_simulation, 
                           self.hatch_simulation]
-
+        ## initialize light intensity
+        self.internal_light_intensity = self.led_simulation.set_led_light_intensity()
+       
     def run_simulation(self, client: Client):
     
         trend_effect = 0.5  # Adjust sensitivity (higher = faster changes)
         
         ######### Light Adjustment #########
-        self.sun_light_intensity  = self.light_simulation.get_light_intensity()
-        if not (self.led_simulation.running):
-            self.internal_light_intensity = self.light_simulation.get_light_intensity()
+        self.sun_light_intensity  = self.light_simulation.get_light_intensity() 
+        self.led_simulation.set_led_light_intensity()
+        #if not (self.led_simulation.running):
+            #self.internal_light_intensity = self.light_simulation.get_light_intensity()
+            
+        
+        print(f"{self.name} - Sunlight: {self.sun_light_intensity:.1f} lux, Internal Light: {self.internal_light_intensity:.1f} lux")   
         
         
         ######### Temperature Adjustment #########
