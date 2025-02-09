@@ -1,0 +1,13 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://192.168.1.100:8086  # InfluxDB service URL
+    isDefault: true
+    jsonData:
+      version: Flux  # Use InfluxDB 2.0 Flux queries
+      organization: univaq
+      defaultBucket: greenhouse
+    secureJsonData:
+      token: KUvb_lFIfTIEPDLDrw0c4xfoec2AoQDwGMQ9A7LrTL5H3UI7LIVp0FiuXPCDYxZzCGFxtFOy4wPsrdU-kEnV_g==

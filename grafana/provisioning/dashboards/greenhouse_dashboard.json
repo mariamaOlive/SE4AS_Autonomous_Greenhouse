@@ -1,0 +1,55 @@
+{
+    "id": null,
+    "uid": "greenhouse_dashboard",
+    "title": "Greenhouse Monitoring",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "5s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "title": "Temperature (°C)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "query": "from(bucket: \"greenhouse\") |> range(start: -1h) |> filter(fn: (r) => r[\"_measurement\"] == \"temperature\")",
+            "datasource": "InfluxDB"
+          }
+        ]
+      },
+      {
+        "title": "Humidity (%)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "query": "from(bucket: \"greenhouse\") |> range(start: -1h) |> filter(fn: (r) => r[\"_measurement\"] == \"humidity\")",
+            "datasource": "InfluxDB"
+          }
+        ]
+      },
+      {
+        "title": "CO₂ Levels (ppm)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "query": "from(bucket: \"greenhouse\") |> range(start: -1h) |> filter(fn: (r) => r[\"_measurement\"] == \"co2_levels\")",
+            "datasource": "InfluxDB"
+          }
+        ]
+      },
+      {
+        "title": "Light Intensity (lux)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "query": "from(bucket: \"greenhouse\") |> range(start: -1h) |> filter(fn: (r) => r[\"_measurement\"] == \"internal_light_intensity\")",
+            "datasource": "InfluxDB"
+          }
+        ]
+      }
+    ]
+  }
+  
