@@ -76,11 +76,8 @@ class LedLightSimulation:
         
     def publish_status(self, status):
         self.client_mqtt.publish(
-            f"greenhouse/{self.sector.name}/internal_light_intensity",
+            f"greenhouse/sensor_raw/{self.sector.name}/internal_light_intensity",
             self.sector.internal_light_intensity,
-        )
-        self.client_mqtt.publish(
-            f"greenhouse/feedback/{self.sector.name}/led_lights", status
         )
         self.client_mqtt.publish(
             f"greenhouse/actuator_status/{self.sector.name}/led_lights", status

@@ -49,14 +49,12 @@ class HeaterSimulation:
             print(f"Heater started in {self.sector.name}")
             Thread(target=self.heater_effect).start() # Use a thread to simulate the effect
 
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/heater", f"ON")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/heater", f"ON")
 
 
     def stop_heater(self):
         self.running = False
         print(f"Heater stopped in {self.sector.name}")
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/heater", "OFF")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/heater", "OFF")
 
 
@@ -68,5 +66,5 @@ class HeaterSimulation:
             self.sector.temperature += temperature_increase*random.uniform(0.1, 1)  # Apply heating
             
             # Publish new value to MQTT
-            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
+            self.client_mqtt.publish(f"greenhouse/sensor_raw/{self.sector.name}/temperature", self.sector.temperature)
             time.sleep(5)  # Update every 5 seconds

@@ -47,14 +47,12 @@ class CO2InjectorSimulation:
             print(f"co2_injectors started in {self.sector.name}")
             Thread(target=self.co2_injection_effect).start() # Use a thread to simulate the effect
 
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/co2_injector", "ON")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_injector", "ON")
 
 
     def stop_co2_injection(self):
         self.running = False
         print(f"co2_injectors stopped in {self.sector.name}")
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/co2_injector", "OFF")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_injector", "OFF")
 
     def co2_injection_effect(self):
@@ -65,5 +63,5 @@ class CO2InjectorSimulation:
             self.sector.co2_levels += co2_increase*random.uniform(.5, 1) 
             
             # Publish new value to MQTT
-            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/co2_levels", self.sector.co2_levels)
+            self.client_mqtt.publish(f"greenhouse/sensor_raw/{self.sector.name}/co2_levels", self.sector.co2_levels)
             time.sleep(5)  # Update every 5 seconds

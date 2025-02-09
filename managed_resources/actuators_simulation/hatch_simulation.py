@@ -43,7 +43,6 @@ class HatchSimulation:
 
     def open_hatch(self):
         print(f"Opening hatch in {self.sector.name}")
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/hatch", "OPEN")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/hatch", "OPEN")
 
         self.running = True  # Mark as OPEN
@@ -51,6 +50,5 @@ class HatchSimulation:
 
     def close_hatch(self):
         print(f"Closing hatch in {self.sector.name}")
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/hatch", "CLOSE")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/hatch", "CLOSE")
         self.running = False  # Mark as CLOSED

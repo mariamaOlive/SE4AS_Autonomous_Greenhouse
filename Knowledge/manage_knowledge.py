@@ -52,12 +52,10 @@ class Knowledge:
             print("Connected to MQTT Broker!")
             self.mqtt_client.subscribe(
                 "greenhouse/monitor/#"
-            )  # Subscribe to the raw sensor data topics
-            self.mqtt_client.subscribe(
-                "greenhouse/actuator_status/#"
-            )  # Subscribe to the actuator status topics
+            )  # Subscribe to monitor data
         else:
             print(f"Failed to connect: {reason_code}")
+
 
     def on_subscribe(self, client, userdata, mid, reason_code_list, properties):
         """Callback function for when the client receives a SUBACK response from the server."""
@@ -66,33 +64,34 @@ class Knowledge:
         else:
             print(f"Broker granted the following QoS: {reason_code_list[0].value}")
 
+
     def on_message(self, client, userdata, msg):
         """Callback function for when a PUBLISH message is received from the server."""
         payload = msg.payload.decode("utf-8")
         print(f"Received message on topic: {msg.topic} with payload: {payload}")
 
         topic_part = msg.topic.split("/")
-        if topic_part[1] == "monitor": # e.g greenhouse/monitor/West Section/temperature/
+        
+        if topic_part[2] == "sensor_raw": # e.g greenhouse/monitor/sensor_raw/West Section/temperature/
             self.writeDB(topic_part, float(payload))
-        elif topic_part[1] == "actuator_status": # e.g greenhouse/actuator_status/West Section/fan
+        elif topic_part[2] == "actuator_status": # e.g greenhouse/monitor/actuator_status/West Section/fan
             self.writeDB(topic_part, str(payload))
 
-        
         return None
 
     def writeDB(self, topic_part, value):
         """Writes the sensor data to InfluxDB."""
 
-        if topic_part[1] == "monitor":  # Updated to handle actuator status
+        if topic_part[2] == "sensor_raw":  # Updated to handle actuator status
             data_point = (
                 influxdb_client.Point("sensor_data")
-                .tag("section", topic_part[2])
-                .field(topic_part[3], value)
+                .tag("section", topic_part[3])
+                .field(topic_part[4], value)
                 .time(int(time.time()), "s")
             )
-        elif topic_part[1] == "actuator_status":  # Updated to handle actuator status
+        elif topic_part[2] == "actuator_status":  # Updated to handle actuator status
             
-            data_point = influxdb_client.Point("actuator_state").tag("section", topic_part[2]).field(topic_part[3], value).time(
+            data_point = influxdb_client.Point("actuator_state").tag("section", topic_part[3]).field(topic_part[4], value).time(
                 int(time.time()), "s")
     
         try:

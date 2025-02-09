@@ -49,7 +49,6 @@ class FanSimulation:
             print(f"Fan started in {self.sector.name} at power {self.power}")
             Thread(target=self.cooling_effect).start() # Use a thread to simulate the effect
 
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/fan", f"ON")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", f"ON")
 
 
@@ -57,7 +56,6 @@ class FanSimulation:
     def stop_fan(self):
         self.running = False
         print(f"Fan stopped in {self.sector.name}")
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/fan", "OFF")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", "OFF")
 
 
@@ -74,7 +72,7 @@ class FanSimulation:
             self.sector.humidity += hum_drop*random.uniform(0.1, 1)  # Apply cooling
 
             # Publish new temperature to MQTT
-            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/temperature", self.sector.temperature)
-            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/humidity", self.sector.humidity)
+            self.client_mqtt.publish(f"greenhouse/sensor_raw/{self.sector.name}/temperature", self.sector.temperature)
+            self.client_mqtt.publish(f"greenhouse/sensor_raw/{self.sector.name}/humidity", self.sector.humidity)
 
             time.sleep(5)  # Update every 5 seconds

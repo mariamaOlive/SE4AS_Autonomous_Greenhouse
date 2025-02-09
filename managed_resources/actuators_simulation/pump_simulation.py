@@ -50,14 +50,12 @@ class PumpSimulation:
             Thread(target=self.pump_effect).start()  # Simulate humidity increase
 
         # Publish feedback
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/pump", "ON")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/pump", "ON")
 
 
     def stop_pump(self):
         self.running = False
         print(f"Pump stopped in {self.sector.name}")
-        self.client_mqtt.publish(f"greenhouse/feedback/{self.sector.name}/pump", "OFF")
         self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/pump", "OFF")
 
 
@@ -72,6 +70,6 @@ class PumpSimulation:
             self.sector.humidity = min(100, self.sector.humidity)
 
             # Publish new value to MQTT
-            self.client_mqtt.publish(f"greenhouse/{self.sector.name}/humidity", self.sector.humidity)
+            self.client_mqtt.publish(f"greenhouse/sensor_raw/{self.sector.name}/humidity", self.sector.humidity)
 
             time.sleep(5)  # Update every 5 seconds

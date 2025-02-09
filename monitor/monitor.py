@@ -30,15 +30,24 @@ class Monitor:
         if reason_code == 0:
             print("Connected to MQTT Broker!")
             self.client_mqtt.subscribe("greenhouse/sensor_raw/#")  # Subscribe to the raw sensor data topics
+            self.client_mqtt.subscribe("greenhouse/actuator_status/#")  # Subscribe to the sensor status topics
         else:
             print(f"Failed to connect: {reason_code}")
 
     def on_message(self, client, userdata, msg):
         '''Callback function for when a PUBLISH message is received from the server.'''
         payload = msg.payload.decode("utf-8")
-        topic_part = msg.topic.split("/")
-        value = float(payload)
-        self.write_to_knowledge_base(topic_parts=topic_part, value_data=value)  # Write the data to the knowledge base
+        topic_parts = msg.topic.split("/")
+        topic_type = topic_parts[1]
+        sector = topic_parts[2]
+        sensor = topic_parts[3]
+        
+        #Veriy which topic arrived 
+        value = payload if topic_type == "actuator_status" else float(payload)
+   
+        # Write the data to the knowledge base  
+        self.write_to_knowledge_base(topic_type, sector, sensor, value_data=value)  
+
 
     def on_subscribe(self, client, userdata, mid, reason_code_list, properties):
         '''Callback function for when the client receives a SUBACK response from the server.'''
@@ -48,15 +57,10 @@ class Monitor:
             print(f"Broker granted the following QoS: {reason_code_list[0].value}")
 
 
- 
-
-
-
-        
-    def write_to_knowledge_base(self, topic_parts, value_data):
+    def write_to_knowledge_base(self, topic_type, sector, sensor, value_data):
         '''Write the data to the knowledge base (publish to MQTT)'''
         # Construct the topic to publish the value data to
-        topic = f"greenhouse/monitor/{topic_parts[-2]}/{topic_parts[-1]}"
+        topic = f"greenhouse/monitor/{topic_type}/{sector}/{sensor}"
         # Publish the value data to the topic
         self.client_mqtt.publish(topic, json.dumps(value_data))
         print(f"Published value data to {topic}: {value_data}")
