@@ -27,7 +27,7 @@ if __name__ == '__main__':
     
     light_simulation = LightSimulation(sector_data[weather_type]["exterior"]["light_intensity"]["value"])
 
-    # Initilize sections array
+    # Initialize sections array
     sectors = []
     # Load Sections
     for sector in sectors_conf:
