@@ -6,7 +6,7 @@
         },
         "nighttime": {
             "min": 15,
-            "max": 18
+            "max": 22
         },
         "optimal": 20,
         "max_limit": 30

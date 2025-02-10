@@ -53,10 +53,10 @@ class Temperature:
     def handle_increasing_status(self, current_actuator_state, actuator_heater, actuator_fan, actuator_hatch):
         """Handle increasing status for temperature adjustment."""
         if self.current_status == 'high':
-            self.turn_off_heater(current_actuator_state, actuator_heater, )
+            self.turn_off_heater(current_actuator_state, actuator_heater )
             self.open_hatch_if_needed(current_actuator_state, actuator_hatch)
         elif self.current_status == 'too_high':
-            self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_fan, actuator_hatch)
+            self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_fan, actuator_hatch,actuator_hatch=actuator_hatch)
         elif self.current_status == 'optimal':
             self.turn_off_heater_and_turn_off_fan_and_close_hatch(actuator_heater, actuator_fan, actuator_hatch)
         elif self.current_status == 'low':
@@ -68,10 +68,10 @@ class Temperature:
     def handle_decreasing_status(self, current_actuator_state, actuator_heater, actuator_fan, actuator_hatch):
         """Handle decreasing status for temperature adjustment."""
         if self.current_status == 'high':
-            self.turn_off_heater(current_actuator_state, actuator_heater, actuator_fan)
+            self.turn_off_heater(current_actuator_state, actuator_heater)
             self.open_hatch_if_needed(current_actuator_state, actuator_hatch)
         elif self.current_status == 'too_high':
-            self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_heater, actuator_fan)
+            self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_heater, actuator_fan,actuator_hatch=actuator_hatch)
         elif self.current_status == 'low':
             self.close_hatch_if_open(current_actuator_state, actuator_hatch)
             self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
@@ -116,7 +116,7 @@ class Temperature:
             self.commands[self.section][actuator_fan] = 'ON'
 
 
-    def turn_off_heater(self, current_actuator_state, actuator_heater, ):
+    def turn_off_heater(self, current_actuator_state, actuator_heater):
         """Turn off heater or fan if on."""
         if current_actuator_state[actuator_heater] == 'ON':
             self.commands[self.section][actuator_heater] = 'OFF'
