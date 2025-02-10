@@ -47,9 +47,10 @@ class PumpSimulation:
         if not self.running:
             self.running = True
             print(f"Pump started in {self.sector.name}")
-            # Publish feedback
-            self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/pump", "ON")
             Thread(target=self.pump_effect).start()  # Simulate humidity increase
+
+        # Publish feedback
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/pump", "ON")
 
 
     def stop_pump(self):

@@ -45,8 +45,9 @@ class CO2InjectorSimulation:
         if not self.running:
             self.running = True
             print(f"co2_injectors started in {self.sector.name}")
-            self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_injector", "ON")
             Thread(target=self.co2_injection_effect).start() # Use a thread to simulate the effect
+
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/co2_injector", "ON")
 
 
     def stop_co2_injection(self):

@@ -47,8 +47,10 @@ class FanSimulation:
             self.running = True
             self.power = max(1, min(10, power))  # Ensure power is between 1 and 10
             print(f"Fan started in {self.sector.name} at power {self.power}")
-            self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", f"ON")
             Thread(target=self.cooling_effect).start() # Use a thread to simulate the effect
+
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/fan", f"ON")
+
 
 
     def stop_fan(self):
