@@ -34,7 +34,7 @@ class FanSimulation:
             print(f"Fan in {self.sector.name} received command: {command}")
 
             if command == "ON":
-                self.start_fan(10)  # Default power 5
+                self.start_fan(10)  # Default power 10
             elif command == "OFF":
                 self.stop_fan()
 
@@ -60,7 +60,7 @@ class FanSimulation:
 
 
     def cooling_effect(self):
-        k = 0.05  # Cooling efficiency factor
+        k = 0.01  # Cooling efficiency factor
 
         while self.running:
             # Adjust Temperature
