@@ -47,9 +47,9 @@ class HeaterSimulation:
         if not self.running:
             self.running = True
             print(f"Heater started in {self.sector.name}")
+            self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/heater", f"ON")
             Thread(target=self.heater_effect).start() # Use a thread to simulate the effect
 
-        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/heater", f"ON")
 
 
     def stop_heater(self):
