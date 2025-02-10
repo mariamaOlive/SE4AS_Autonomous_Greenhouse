@@ -113,6 +113,8 @@ class Plans:
 
         # Call the plan_temperature method from Temperature class
         temperature.plan_temperature()
+        print(f'commands after planning temperature for section {section} is {self.commands[section]['fan']} for fan, 
+              {self.commands[section]['hatch']} for hatch, and {self.commands[section]['heater']} for heater')
         
 
         # At this point, the `commands` dictionary has been updated by the Temperature class

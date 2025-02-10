@@ -187,6 +187,8 @@ class Analyzer:
         else:
             temp_threshold = self.plant_threshold['night_time_temp']
             
+        print(f'checking last_temperature: {last_temperature}')
+        
         if last_temperature < temp_threshold['temp_min'] : # less than 15 or 17
              temperature_status = 'too_low'
         elif last_temperature > temp_threshold['temp_min'] and last_temperature < temp_threshold['optimal']-1: # between 15- 19 or 17 -19
@@ -197,6 +199,8 @@ class Analyzer:
             temperature_status = 'high'
         elif last_temperature > temp_threshold['max_temp']-2: # greater than 27
             temperature_status = 'too_high'
+        print(f'checking temperature_status: {temperature_status}')
+        print(f'checking temperature_state: {temperature_state}')
         return temperature_state, temperature_status
     
     def check_env_var(self, section, env_var):
