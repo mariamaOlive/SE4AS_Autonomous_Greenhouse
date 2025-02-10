@@ -187,15 +187,15 @@ class Analyzer:
         else:
             temp_threshold = self.plant_threshold['night_time_temp']
             
-        if last_temperature < temp_threshold['temp_min'] :
+        if last_temperature < temp_threshold['temp_min'] : # less than 15 or 17
              temperature_status = 'too_low'
-        elif last_temperature > temp_threshold['temp_min'] and last_temperature < temp_threshold['optimal']-1:
+        elif last_temperature > temp_threshold['temp_min'] and last_temperature < temp_threshold['optimal']-1: # between 15- 19 or 17 -19
             temperature_status = 'low'
-        elif last_temperature >= temp_threshold['optimal']-1 and last_temperature <= temp_threshold['optimal']+2:
+        elif last_temperature >= temp_threshold['optimal']-1 and last_temperature <= temp_threshold['optimal']+2: #between 19 -22 or 19-22
             temperature_status = 'optimal'
-        elif last_temperature > temp_threshold['optimal']+2 and last_temperature <= temp_threshold['max_temp']-2:
+        elif last_temperature > temp_threshold['optimal']+2 and last_temperature <= temp_threshold['max_temp']-2: # between 23 and 27
             temperature_status = 'high'
-        elif last_temperature > temp_threshold['max_temp']-2:
+        elif last_temperature > temp_threshold['max_temp']-2: # greater than 27
             temperature_status = 'too_high'
         return temperature_state, temperature_status
     

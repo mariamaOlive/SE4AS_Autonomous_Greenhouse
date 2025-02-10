@@ -1,12 +1,12 @@
 {
     "temperature": {
         "daytime": {
-            "min": 20,
-            "max": 25
+            "min": 17,
+            "max": 28
         },
         "nighttime": {
             "min": 15,
-            "max": 22
+            "max": 24
         },
         "optimal": 20,
         "max_limit": 30
