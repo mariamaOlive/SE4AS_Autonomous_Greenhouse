@@ -45,8 +45,9 @@ class Temperature:
             self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_fan, actuator_hatch,actuator_hatch=actuator_hatch)
         elif self.current_status in ['low', 'too_low']:
             self.turn_on_heater_if_off(current_actuator_state, actuator_heater)
-            self.close_hatch_if_open(current_actuator_state, actuator_hatch)
-            self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
+            self.turn_off_fan_and_close_hatch(actuator_fan, actuator_hatch)
+            #self.close_hatch_if_open(current_actuator_state, actuator_hatch)
+            #self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
         elif self.current_status == 'optimal':
             self.turn_off_heater_and_turn_off_fan_and_close_hatch(actuator_heater, actuator_fan, actuator_hatch)
         
@@ -60,8 +61,9 @@ class Temperature:
         elif self.current_status == 'optimal':
             self.turn_off_heater_and_turn_off_fan_and_close_hatch(actuator_heater, actuator_fan, actuator_hatch)
         elif self.current_status == 'low':
-            self.close_hatch_if_open(current_actuator_state, actuator_hatch)
-            self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
+            self.turn_off_fan_and_close_hatch(actuator_fan, actuator_hatch)
+            #self.close_hatch_if_open(current_actuator_state, actuator_hatch)
+            #self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
         elif self.current_status == 'too_low':
             self.turn_on_heater_and_turn_off_fan_and_hatch(actuator_heater, actuator_fan, actuator_hatch)
 
@@ -72,8 +74,10 @@ class Temperature:
         elif self.current_status == 'too_high':
             self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_heater, actuator_fan,actuator_hatch=actuator_hatch)
         elif self.current_status == 'low':
-            self.close_hatch_if_open(current_actuator_state, actuator_hatch)
-            self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
+            self.turn_off_fan_and_close_hatch(actuator_fan, actuator_hatch)
+
+            #self.close_hatch_if_open(current_actuator_state, actuator_hatch)
+            #self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
         elif self.current_status == 'too_low':
             self.turn_on_heater_and_turn_off_fan_and_hatch(actuator_heater, actuator_fan, actuator_hatch)
         elif self.current_status == 'optimal':
@@ -87,8 +91,12 @@ class Temperature:
         elif self.current_status == 'high':
             self.turn_off_heater_or_turn_off_fan(current_actuator_state, actuator_heater, actuator_fan)
         elif self.current_status == 'low':
-            self.close_hatch_if_open(current_actuator_state, actuator_hatch)
-            self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
+            self.turn_off_fan_and_close_hatch(actuator_fan, actuator_hatch)
+        elif self.current_status == 'too_high':
+            self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_heater, actuator_fan, actuator_hatch)
+
+            #self.close_hatch_if_open(current_actuator_state, actuator_hatch)
+            #self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
 
         
 
@@ -102,6 +110,10 @@ class Temperature:
         elif self.current_status == 'low':
             self.close_hatch_if_open(current_actuator_state, actuator_hatch)
             self.turn_off_fan_if_on(current_actuator_state, actuator_fan)
+        elif self.current_status == 'too_low':
+            self.turn_on_heater_and_turn_off_fan_and_hatch(actuator_heater, actuator_fan, actuator_hatch)
+        elif self.current_status == 'too_high':
+            self.turn_on_fan_turn_off_heater_and_open_hatch(actuator_heater, actuator_fan, actuator_hatch)
 
     # Helper Functions for Actuator Commands
     
@@ -140,14 +152,15 @@ class Temperature:
         if current_actuator_state[actuator_fan] == 'ON':
             self.commands[self.section][actuator_fan] = 'OFF'
 
-    def open_hatch_if_needed(self, current_actuator_state, actuator_hatch):
+    def open_hatch_if_needed(self, current_actuator_state, actuator_hatch, actuator_fan):
         """Open hatch if it's closed."""
+    
         if current_actuator_state[actuator_hatch] == 'CLOSE':
             self.commands[self.section][actuator_hatch] = 'OPEN'
 
     def close_hatch_if_open(self, current_actuator_state, actuator_hatch):
         """Close hatch if it's open."""
-        if current_actuator_state[actuator_hatch] == 'CLOSE':
+        if current_actuator_state[actuator_hatch] == 'OPEN':
             self.commands[self.section][actuator_hatch] = 'CLOSE'
 
     def turn_on_heater_and_turn_off_fan_and_hatch(self, actuator_heater, actuator_fan, actuator_hatch):
@@ -164,7 +177,10 @@ class Temperature:
         """Turn on fan and open hatch."""
         self.commands[self.section][actuator_fan] = 'ON'
         self.commands[self.section][actuator_hatch] = 'OPEN'    
-        
+    def turn_off_fan_and_close_hatch(self, actuator_fan, actuator_hatch):
+        """Turn off fan and close hatch."""
+        self.commands[self.section][actuator_fan] = 'OFF'
+        self.commands[self.section][actuator_hatch] = 'CLOSE'
     def turn_on_fan_turn_off_heater_and_open_hatch(self, actuator_heater, actuator_fan, actuator_hatch):
         """Turn on fan and open hatch."""
         self.commands[self.section][actuator_heater] = 'OFF'

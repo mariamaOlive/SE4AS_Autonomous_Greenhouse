@@ -197,7 +197,7 @@ class Analyzer:
             temperature_status = 'optimal'
         elif last_temperature > temp_threshold['optimal']+2 and last_temperature <= temp_threshold['max_temp']-2: # between 23 and 27
             temperature_status = 'high'
-        elif last_temperature > temp_threshold['max_temp']-2: # greater than 27
+        elif last_temperature > temp_threshold['max_temp']-2: # greater than 28
             temperature_status = 'too_high'
         print(f'checking temperature_status: {temperature_status}')
         print(f'checking temperature_state: {temperature_state}')
