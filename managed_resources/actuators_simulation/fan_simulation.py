@@ -67,7 +67,7 @@ class FanSimulation:
             temp_drop = -k * self.power * self.sector.temperature  # Cooling based on current temp & fan power
             self.sector.temperature += temp_drop*random.uniform(0.1, 1)  # Apply cooling
             
-            # Adjust Humidiy
+            # Adjust Humidity
             hum_drop = -k * self.power * self.sector.humidity  # Cooling based on current temp & fan power
             self.sector.humidity += hum_drop*random.uniform(0.1, 1)  # Apply cooling
 

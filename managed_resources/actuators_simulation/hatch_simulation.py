@@ -44,8 +44,8 @@ class HatchSimulation:
     def open_hatch(self):
         if not self.running:
             print(f"Opening hatch in {self.sector.name}")
-            self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/hatch", "OPEN")
-
+            
+        self.client_mqtt.publish(f"greenhouse/actuator_status/{self.sector.name}/hatch", "OPEN")
         self.running = True  # Mark as OPEN
 
 
