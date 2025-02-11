@@ -59,7 +59,7 @@ class HeaterSimulation:
 
 
     def heater_effect(self):
-        k = 0.01  # Efficiency factor
+        k = 0.1  # Efficiency factor
 
         while self.running:
             temperature_increase = k * self.sector.temperature  
@@ -67,4 +67,4 @@ class HeaterSimulation:
             
             # Publish new value to MQTT
             self.client_mqtt.publish(f"greenhouse/sensor_raw/{self.sector.name}/temperature", self.sector.temperature)
-            time.sleep(5)  # Update every 5 seconds
+            time.sleep(3)  # Update every 3 seconds

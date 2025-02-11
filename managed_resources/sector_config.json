@@ -31,7 +31,7 @@
     },
     "Very Cold": {
         "exterior": {
-            "temperature": {"base": -2.0, "max": 15},
+            "temperature": {"base": 2.0, "max": 12},
             "light_intensity": {"value": 50000}
         },
         "sectors": [
