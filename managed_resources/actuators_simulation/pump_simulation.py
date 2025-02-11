@@ -60,7 +60,7 @@ class PumpSimulation:
 
 
     def pump_effect(self):
-        k = 0.05  # Humidity increase factor
+        k = 0.1  # Humidity increase factor
 
         while self.running:
             humidity_increase = k * (100 - self.sector.humidity)  # More effective when humidity is low

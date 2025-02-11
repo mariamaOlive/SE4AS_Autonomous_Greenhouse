@@ -2,7 +2,7 @@ from temperature import   Temperature
 from humidity import Humidity
 
 class Plans:
-    SENSOR_ACTUATOR_MAPPING = {'co2_levels':'co2_injector', 'humidity':['heater', 'pump'], 'internal_light_intensity': 'led_lights', 'temperature':['fan', 'hatch','heater']}
+    SENSOR_ACTUATOR_MAPPING = {'co2_levels':'co2_injector', 'humidity':['pump'], 'internal_light_intensity': 'led_lights', 'temperature':['fan', 'hatch','heater']}
     def __init__(self,current_status,current_trend,past_status,past_trend, 
                  current_actuator_state, actuator_changed_status,commands):
         self.current_status = current_status

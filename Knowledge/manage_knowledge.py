@@ -250,7 +250,8 @@ if __name__ == "__main__":
     pooling_timer = time.time()
 
     while True:
-        if time.time() - pooling_timer >= 5:
-            knowledge.publish_latest_values()    
+        if time.time() - pooling_timer >= 3:
+            knowledge.publish_latest_values() 
+            pooling_timer = time.time()  
         time.sleep(1)
         

@@ -60,7 +60,7 @@ class FanSimulation:
 
 
     def cooling_effect(self):
-        k = 0.01  # Cooling efficiency factor
+        k = 0.022  # Cooling efficiency factor
 
         while self.running:
             # Adjust Temperature

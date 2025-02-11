@@ -67,16 +67,16 @@ class Sector:
         external_temperature = self.exterior["temperature"]["base"] + (normalized_intensity * self.exterior["temperature"]["max"])
         # Compute internal temperature with greenhouse effect
         greenhouse_effect = 1.2  # Factor to simulate heat retention
-        self.temperature = self.temperature + ((external_temperature - self.temperature) * greenhouse_effect * 0.1)
+        self.temperature = self.temperature + ((external_temperature - self.temperature) * greenhouse_effect * 0.05)
         # Add small random fluctuations
-        self.temperature += random.uniform(-0.5, 0.5)
+        self.temperature += random.uniform(-0.2, 0.2)
         # Round value
         self.temperature = round(self.temperature, 2)
         
 
         ######### Humidity Adjustment #########
         temp_factor = (self.temperature - self.exterior["temperature"]["base"]) / self.exterior["temperature"]["max"]
-        humidity_change = -temp_factor * 10.0  # Higher temperature lowers humidity
+        humidity_change = -temp_factor * 5.0  # Higher temperature lowers humidity
         self.humidity = max(5.0, min(100.0, self.humidity + humidity_change)) 
         # Add small random fluctuations
         self.humidity += random.uniform(-2.0, 2.0)
