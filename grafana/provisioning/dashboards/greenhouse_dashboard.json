@@ -483,7 +483,7 @@
       "options": {
         "minVizHeight": 75,
         "minVizWidth": 75,
-        "orientation": "vertical",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -975,9 +975,7 @@
     "list": [
       {
         "current": {
-          "text": [
-            "All"
-          ],
+          "text": "All",
           "value": [
             "$__all"
           ]
@@ -996,63 +994,17 @@
         "regex": "",
         "sort": 1,
         "type": "query"
-      },
-      {
-        "current": {
-          "text": [
-            "co2_levels"
-          ],
-          "value": [
-            "co2_levels"
-          ]
-        },
-        "definition": "import \"influxdata/influxdb/v1\"\n\nv1.fieldKeys(\n    bucket: v.defaultBucket,\n    predicate: (r) => r._measurement == \"sensor_data\",\n    start: -1d\n)\n",
-        "includeAll": true,
-        "label": "sensors",
-        "multi": true,
-        "name": "sensors",
-        "options": [],
-        "query": {
-          "query": "import \"influxdata/influxdb/v1\"\n\nv1.fieldKeys(\n    bucket: v.defaultBucket,\n    predicate: (r) => r._measurement == \"sensor_data\",\n    start: -1d\n)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": [
-            "co2_injector"
-          ],
-          "value": [
-            "co2_injector"
-          ]
-        },
-        "definition": "import \"influxdata/influxdb/v1\"\n\nv1.fieldKeys(\n    bucket: v.defaultBucket,\n    predicate: (r) => r._measurement == \"actuator_state\",\n    start: -1d\n)\n",
-        "includeAll": true,
-        "label": "actuators",
-        "multi": true,
-        "name": "actuators",
-        "options": [],
-        "query": {
-          "query": "import \"influxdata/influxdb/v1\"\n\nv1.fieldKeys(\n    bucket: v.defaultBucket,\n    predicate: (r) => r._measurement == \"actuator_state\",\n    start: -1d\n)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Green House Monitoring",
   "uid": "becp7r6ylxtdse",
-  "version": 15,
+  "version": 18,
   "weekStart": ""
 }
