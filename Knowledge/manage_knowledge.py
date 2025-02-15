@@ -91,8 +91,8 @@ class Knowledge:
             )
         elif topic_part[2] == "actuator_status":  # Updated to handle actuator status
             
-            data_point = influxdb_client.Point("actuator_state").tag("section", topic_part[3]).field(topic_part[4], value).time(
-                int(time.time()), "s")
+            data_point = influxdb_client.Point("actuator_state").tag("section", topic_part[3]).field(topic_part[4], value.replace("\"")).time(
+                int(time.time()), "s",protocol='line')
     
         try:
             self.write_api.write(bucket=self.bucket, org=self.org, record=data_point)
