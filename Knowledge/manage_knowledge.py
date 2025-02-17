@@ -86,7 +86,7 @@ class Knowledge:
             data_point = (
                 influxdb_client.Point("sensor_data")
                 .tag("section", topic_part[3])
-                .field(topic_part[4], value)
+                .field(topic_part[4], round(value,2))
                 .time(int(time.time()), "s")
             )
         elif topic_part[2] == "actuator_status":  # Updated to handle actuator status
@@ -108,7 +108,7 @@ class Knowledge:
                     |> range(start: -5m)  
                     |> filter(fn: (r) => r["_measurement"] == "sensor_data" )
                     |> group(columns: ["_measurement", "_field", "section"])  
-                    |> tail(n: 3) 
+                    |> tail(n: 5) 
             """
 
 

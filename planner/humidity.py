@@ -22,14 +22,19 @@ class Humidity:
     def plan_humidity(self):
         """Plan humidity actions based on status and trend."""
         # Handle high humidity
-        if self.current_status in ['too_high', 'high']:
+        if self.current_status in ['too_high', 'high'] and self.current_trend in ['Increasing', 'Stable']:
             self.handle_high_humidity()
-        # Handle low humidity
-        elif self.current_status in ['too_low', 'low']:
+        elif self.current_status in ['too_low', 'low'] and self.current_trend in ['Decreasing', 'Stable']:
             self.handle_low_humidity()
-        # Handle optimal humidity
-        else:
-            self.handle_optimal_state()  # If humidity is optimal, turn everything off
+        elif self.current_status == 'optimal':
+            if self.current_trend == 'Stable':
+                self.handle_optimal_state()  # If humidity is optimal, and the trend is stable, turn off the pump
+            elif self.current_trend == 'Increasing' and self.past_trend == 'Increasing':
+                self.handle_high_humidity()  # If humidity is optimal, and the trend is increasing, turn off the pump
+            elif self.current_trend == 'Decreasing' and self.past_trend == 'Decreasing':
+                self.handle_low_humidity()  # If humidity is optimal, and the trend is decreasing, turn on the pump
+                
+            
 
     def handle_high_humidity(self):
         """Handles cases where humidity is too high. need to decrease it. by turning off pump"""
@@ -43,4 +48,4 @@ class Humidity:
             
     def handle_optimal_state(self):
         """Turn off pump if it is ON."""
-        self.commands[self.section][self.actuator_pump] = 'OFF'
+        self.commands[self.section][self.actuator_pump] = 'OFF'  # Turn off pump

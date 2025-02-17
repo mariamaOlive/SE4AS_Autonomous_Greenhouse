@@ -118,7 +118,7 @@ class Analyzer:
         
     def get_slope(self, values):
         
-        values = np.array(values, dtype=np.float64)
+        values = np.array(values, dtype=np.float64)[-3:]
 
         # 🛠️ Step 1: Check for empty input
         if values.size < 2:
