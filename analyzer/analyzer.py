@@ -4,10 +4,23 @@ import time
 import json
 import argparse
 import numpy as np
+import configparser
 
-# MQTT setup
-MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
-MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", 1883))
+import sys
+
+configparser = configparser.ConfigParser()
+
+BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+configparser.read(os.path.join(BASE_FOLDER,'/shared_files/config.ini'))
+
+DEFAULT_MQTT_BROKER = configparser.get('DEFAULTS','default_mqtt_broker_host')
+DEFAULT_MQTT_PORT = configparser.get('DEFAULTS','default_mqtt_broker_port')
+
+
+#MQTT setup
+MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", DEFAULT_MQTT_BROKER)
+MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", DEFAULT_MQTT_PORT))
 
 class Analyzer:
     def __init__(self, plant_thresholds_file):
@@ -289,9 +302,11 @@ class Analyzer:
                 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Greenhouse Analyzer")
+    # Adding argument for the MQTT broker host
+    default_threshold_file =  os.path.join(BASE_FOLDER,configparser.get('DEFAULTS','default_threshhold_file'))
     
     # Adding argument for the threshold file
-    parser.add_argument('--file_threshold', '-f', type=str, default='greenhouse_threshold.json', 
+    parser.add_argument('--file_threshold', '-f', type=str, default=default_threshold_file, 
                         help='The file containing the thresholds for the plants in the greenhouse')
 
     # Parse the arguments

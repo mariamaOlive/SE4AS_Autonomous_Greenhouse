@@ -61,29 +61,6 @@ class Executor:
         self.client_mqtt.publish(topic, json.dumps(execution_plan), qos=2)
         print(f"Sent execution plan for {section}: {execution_plan}")  
         
-  
-            
-            
-        
-          
-    def random_executor(self,sector):
-
-        command_fan = random.choice(["ON", "OFF"])
-        command_co2_injector = random.choice(["ON", "OFF"])
-        command_heater= random.choice(["ON", "OFF"])
-        command_pump= random.choice(["ON", "OFF"])
-        command_lights= random.choice(["ON", "OFF"])
-        command_hatch= random.choice(["OPEN", "CLOSE"])
-
-        return {
-            "fan": command_fan,
-            "co2_injector": command_co2_injector,
-            "heater": command_heater,
-            "pump": command_pump,
-            "led_lights": command_lights,
-            "hatch": command_hatch,
-        }
-
 if __name__ == '__main__':
     executor = Executor()
     while True:

@@ -2,13 +2,27 @@ import paho.mqtt.client as mqtt
 import os
 import time
 import json
+import configparser
 
 from plans import Plans
 
+# Load configuration file
+configparser = configparser.ConfigParser()
+
+BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+configparser.read(os.path.join(BASE_FOLDER,'/shared_files/config.ini'))
+
+DEFAULT_MQTT_BROKER = configparser.get('DEFAULTS','default_mqtt_broker_host')
+DEFAULT_MQTT_PORT = configparser.get('DEFAULTS','default_mqtt_broker_port')
+
+SIMULATION_WEATHER_TYPE = configparser.get('SIMULATION','weather_type')
+
 
 # MQTT setup
-MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "localhost")
-MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", 1883))
+MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", DEFAULT_MQTT_BROKER)
+MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", DEFAULT_MQTT_PORT))
+    
 
 
 #planner class
@@ -31,26 +45,41 @@ class Planner:
        
         self.prev_actuator_change_status = {}
         self.current_actuator_change_status = {}
-        self.current_actuator_state = {"North Section": {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}, 
-                                            "South Section": {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}, 
-                                            "West Section": {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}}
         
+        with open(os.path.join(BASE_FOLDER,"/shared_files/sector_config.json"), "r") as file:
+            sector_data = json.load(file)
         
-        self.prev_env_var_status = {'North Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'},  
-                                    'South Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'},
-                                    'West Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'}}
+            # get the names of the sections from the JSON file
+        sector_names = [section["name"] for section in sector_data[SIMULATION_WEATHER_TYPE]["sectors"]]
+        print(sector_names)
+        # Initialize actuator states for each section
+        self.current_actuator_state = {
+                                        name: {"co2_injector": "OFF", "fan": "OFF", "hatch": "CLOSE", "heater": "OFF", "led_lights": "OFF", "pump": "OFF"}
+                                        for name in sector_names
+                                        }
+        # initialize the managed resources for each section
+        resource_keys = [key for key in sector_data[SIMULATION_WEATHER_TYPE]["sectors"][0].keys() if key != "name"]
+        print(resource_keys)
+        
+        self.prev_env_var_status = {
+                name: {key: "optimal" for key in resource_keys}
+                for name in sector_names
+            }
 
-        self.prev_env_var_trend = {'North Section': {'co2_levels': 'Stable', 'humidity': 'Stable', 'internal_light_intensity': 'Stable', 'temperature': 'Stable'},  
-                                    'South Section': {'co2_levels': 'Stable', 'humidity': 'Stable', 'internal_light_intensity': 'Stable', 'temperature': 'Stable'},
-                                    'West Section': {'co2_levels': 'Stable', 'humidity': 'Stable', 'internal_light_intensity': 'Stable', 'temperature': 'Stable'}}
-        
-        self.current_env_var_status = {'North Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'},  
-                                    'South Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'},
-                                    'West Section': {'co2_levels': 'optimal', 'humidity': 'optimal', 'internal_light_intensity': 'optimal', 'temperature': 'optimal'}}
+        self.prev_env_var_trend = {
+            name: {key: "Stable" for key in resource_keys}
+            for name in sector_names
+        }
 
-        self.current_env_var_trend = {'North Section': {'co2_levels': 'Stable', 'humidity': 'Stable', 'internal_light_intensity': 'Stable', 'temperature': 'Stable'},  
-                                    'South Section': {'co2_levels': 'Stable', 'humidity': 'Stable', 'internal_light_intensity': 'Stable', 'temperature': 'Stable'},
-                                    'West Section': {'co2_levels': 'Stable', 'humidity': 'Stable', 'internal_light_intensity': 'Stable', 'temperature': 'Stable'}}
+        self.current_env_var_status = {
+                name: {key: "optimal" for key in resource_keys}
+                for name in sector_names
+            }
+
+        self.current_env_var_trend = {
+            name: {key: "Stable" for key in resource_keys}
+            for name in sector_names
+        }
         
         self.actuator_command = {}
         

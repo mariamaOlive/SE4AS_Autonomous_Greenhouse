@@ -18,13 +18,22 @@ The Greenhouse Autonomous System optimizes crop growth using the MAPE-K framewor
    git clone https://github.com/yourusername/greenhouse-autonomous-system.git
    cd greenhouse-autonomous-system
    ```
-2. Start the Docker containers:
+2. Configure the environment
+  - Create/ Edit a ```sector_config.json``` file in ```shared_files``` folder. Sample file can be seen in the folder.
+  The ```sector_config.json``` consist of the weather type of the greenhouse location, the sections/sectors in the green house and also some initialization values for the simulation.
+  - Edit the config.ini with the values of the ```weather_type``` the system is expected to simulate/run for.
+  - Edit the ```greenhouse_threshold.json``` file  in  the ```shared_files``` folder to identify the threshold values that is to be used by the system to plan and control the green house environment.
+
+3. Start the Docker containers:
    ```bash
    docker-compose up --build
    ```
-3. Access the Grafana Dashboard:
+4. Access the Grafana Dashboard:
    - URL: `http://localhost:3000`
    - Default credentials: `admin` / `admin`
+5. View Data in the database:
+  - URL: `http://localhost:8086`
+  - Default credential: see .env file
 
 
 ## Project Structure
@@ -59,9 +68,7 @@ The project is organized into several directories, each serving a specific purpo
 
 - **planner/**: Contains planning scripts and configurations.
 
-- **shared_config/**: Contains shared configuration files.
-
-- **shared_files/**: Contains shared files used across the project.
+- **shared_files/**: Contains shared files and configurations used across the project.
 
 
 ## Technologies Used

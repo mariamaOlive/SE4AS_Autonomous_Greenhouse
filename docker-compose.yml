@@ -16,6 +16,7 @@ services:
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}
     volumes:
       - ./influxdb:/var/lib/influxdb2
+      - ./shared_files:/shared_files
     networks:
       greenhouse_network:
         ipv4_address: 192.168.1.100  # Static IP for InfluxDB
@@ -31,6 +32,7 @@ services:
       - ./mosquitto/mosquitto_config:/mosquitto/config
       - ./mosquitto/mosquitto_data:/mosquitto/data
       - ./mosquitto/mosquitto_log:/mosquitto/log
+      - ./shared_files:/shared_files
     networks:
       greenhouse_network:
         ipv4_address: 192.168.1.101  # Static IP for MQTT Broker
@@ -52,6 +54,7 @@ services:
       - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./monitor:/app
+      - ./shared_files:/shared_files
     command: python -u /app/monitor.py
     networks:
       greenhouse_network:
@@ -69,7 +72,8 @@ services:
       - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./analyzer:/app
-    command: python -u /app/analyzer.py -f /app/greenhouse_threshold.json
+      - ./shared_files:/shared_files
+    command: python -u /app/analyzer.py -f /shared_files/greenhouse_threshold.json
     networks:
       greenhouse_network:
         ipv4_address: 192.168.1.103  # Static IP for Analyser
@@ -87,6 +91,7 @@ services:
       - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./planner:/app
+      - ./shared_files:/shared_files
     command: python -u /app/planner.py
     networks:
       greenhouse_network:
@@ -106,6 +111,7 @@ services:
       - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./executor:/app
+      - ./shared_files:/shared_files
     command: python -u /app/executor.py
     networks:
       greenhouse_network:
@@ -124,6 +130,7 @@ services:
       - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./shared_config:/shared_config
+      - ./shared_files:/shared_files
     networks:
       greenhouse_network:
         ipv4_address: 192.168.1.106  # Static IP for Knowledge Service
@@ -140,6 +147,7 @@ services:
       - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     volumes:
       - ./managed_resources:/app
+      - ./shared_files:/shared_files
     command: python -u /app/resources_simulation.py
     networks:
       greenhouse_network:
@@ -161,6 +169,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/dashboards:/var/lib/grafana/dashboards  # Mount dashboard files
       - ./grafana/provisioning:/etc/grafana/provisioning  # Mount provisioning
+      - ./shared_files:/shared_files
     networks:
       greenhouse_network:
         ipv4_address: 192.168.1.108  # Static IP for Grafana
